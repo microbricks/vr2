@@ -1,56 +1,24 @@
 // Elementen
-const notesApp     = document.querySelector('#notesApp');
-const browserApp   = document.querySelector('#browserApp');
-const spotifyApp   = document.querySelector('#spotifyApp');
-
-const openNotes    = document.querySelector('#openNotes');
-const openBrowser  = document.querySelector('#openBrowser');
-const openSpotify  = document.querySelector('#openSpotify');
-
-const notesClose   = document.querySelector('#notesClose');
+const browserApp = document.querySelector('#browserApp');
+const openBrowser = document.querySelector('#openBrowser');
 const browserClose = document.querySelector('#browserClose');
-const spotifyClose = document.querySelector('#spotifyClose');
-
-const notesText    = document.querySelector('#notesText');
 const browserContent = document.querySelector('#browserContent');
 const addressText = document.querySelector('#addressText');
+const keyboard = document.querySelector('#keyboard');
 
 let scrollOffset = 0;
-
-// Notities openen
-openNotes.addEventListener('click', () => {
-  notesApp.setAttribute('visible', true);
-});
 
 // Browser openen
 openBrowser.addEventListener('click', () => {
   browserApp.setAttribute('visible', true);
   loadPage("https://example.com");
+  buildKeyboard();
 });
 
-// Spotify openen
-openSpotify.addEventListener('click', () => {
-  spotifyApp.setAttribute('visible', true);
+// Browser sluiten
+browserClose.addEventListener('click', () => {
+  browserApp.setAttribute('visible', false);
 });
-
-// Sluiten
-notesClose.addEventListener('click', () => notesApp.setAttribute('visible', false));
-browserClose.addEventListener('click', () => browserApp.setAttribute('visible', false));
-spotifyClose.addEventListener('click', () => spotifyApp.setAttribute('visible', false));
-
-// Notities opslaan
-notesApp.addEventListener('click', () => {
-  const text = prompt('Typ je notitie:');
-  if (text) {
-    notesText.setAttribute('value', text);
-    localStorage.setItem('vrNotes', text);
-  }
-});
-
-// Notities laden
-const saved = localStorage.getItem('vrNotes');
-if (saved) notesText.setAttribute('value', saved);
-
 
 // -----------------------------
 // MINI-BROWSER ENGINE
@@ -82,23 +50,20 @@ function extractContent(doc) {
 
   doc.body.querySelectorAll("*").forEach(el => {
 
-    // Afbeeldingen
     if (el.tagName === "IMG" && el.src) {
       items.push({ type: "image", src: el.src });
     }
 
-    // Links
     else if (el.tagName === "A" && el.href) {
       items.push({ type: "link", text: el.innerText || el.href, href: el.href });
     }
 
-    // Tekst
     else if (el.innerText && el.innerText.trim().length > 0) {
       items.push({ type: "text", text: el.innerText });
     }
   });
 
-  return items.slice(0, 120); // performance limit
+  return items.slice(0, 120);
 }
 
 // VR-renderer
@@ -107,20 +72,18 @@ function renderContent(items) {
 
   items.forEach(item => {
 
-    // Tekst
     if (item.type === "text") {
       const t = document.createElement("a-text");
       t.setAttribute("value", item.text);
       t.setAttribute("wrap-count", 50);
-      t.setAttribute("position", `-0.9 ${y} 0`);
+      t.setAttribute("position", `-1 ${y} 0`);
       browserContent.appendChild(t);
       y -= 0.15;
     }
 
-    // Klikbare link
     if (item.type === "link") {
       const btn = document.createElement("a-plane");
-      btn.setAttribute("width", "1.8");
+      btn.setAttribute("width", "2");
       btn.setAttribute("height", "0.15");
       btn.setAttribute("color", "#2a6df4");
       btn.setAttribute("position", `0 ${y} 0`);
@@ -128,8 +91,8 @@ function renderContent(items) {
 
       const txt = document.createElement("a-text");
       txt.setAttribute("value", item.text);
-      txt.setAttribute("position", "-0.85 0 0.01");
-      txt.setAttribute("wrap-count", 40);
+      txt.setAttribute("position", "-0.95 0 0.01");
+      txt.setAttribute("wrap-count", 60);
 
       btn.appendChild(txt);
       browserContent.appendChild(btn);
@@ -139,11 +102,10 @@ function renderContent(items) {
       y -= 0.2;
     }
 
-    // Afbeelding
     if (item.type === "image") {
       const img = document.createElement("a-image");
       img.setAttribute("src", item.src);
-      img.setAttribute("width", "1.8");
+      img.setAttribute("width", "2");
       img.setAttribute("height", "1");
       img.setAttribute("position", `0 ${y} 0`);
       browserContent.appendChild(img);
@@ -158,10 +120,9 @@ function showError(msg) {
   const t = document.createElement("a-text");
   t.setAttribute("value", msg);
   t.setAttribute("color", "red");
-  t.setAttribute("position", "-0.9 0 0");
+  t.setAttribute("position", "-1 0 0");
   browserContent.appendChild(t);
 }
-
 
 // -----------------------------
 // SCROLL SYSTEM
@@ -172,8 +133,63 @@ document.querySelector('#cameraRig').addEventListener("componentchanged", e => {
 
   const pitch = e.detail.newData.x;
 
-  if (pitch < -10) scrollOffset += 0.02;   // omhoog kijken → scroll omhoog
-  if (pitch > 10) scrollOffset -= 0.02;    // omlaag kijken → scroll omlaag
+  if (pitch < -10) scrollOffset += 0.02;
+  if (pitch > 10) scrollOffset -= 0.02;
 
   browserContent.setAttribute("position", `0 ${scrollOffset} 0.01`);
 });
+
+// -----------------------------
+// VR TOETSENBORD
+// -----------------------------
+
+function buildKeyboard() {
+  keyboard.innerHTML = "";
+
+  const keys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
+  let x = -1;
+  let y = 0.4;
+
+  keys.split("").forEach(char => {
+    addKey(char, x, y);
+    x += 0.25;
+    if (x > 1) { x = -1; y -= 0.25; }
+  });
+
+  addKey("BACK", -0.5, -0.2);
+  addKey("ENTER", 0.5, -0.2);
+}
+
+function addKey(label, x, y) {
+  const key = document.createElement("a-plane");
+  key.setAttribute("width", "0.22");
+  key.setAttribute("height", "0.22");
+  key.setAttribute("color", "#444");
+  key.setAttribute("position", `${x} ${y} 0`);
+  key.setAttribute("class", "clickable");
+
+  const txt = document.createElement("a-text");
+  txt.setAttribute("value", label);
+  txt.setAttribute("align", "center");
+  txt.setAttribute("position", "-0.07 0 0.01");
+
+  key.appendChild(txt);
+  keyboard.appendChild(key);
+
+  key.addEventListener("click", () => pressKey(label));
+}
+
+function pressKey(label) {
+  let current = addressText.getAttribute("value");
+
+  if (label === "BACK") {
+    current = current.slice(0, -1);
+  } else if (label === "ENTER") {
+    loadPage(current);
+    return;
+  } else {
+    current += label.toLowerCase();
+  }
+
+  addressText.setAttribute("value", current);
+}
