@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="nl">
   <head>
-    <script src="https://unpkg.com/aframe-html-shader/dist/aframe-html-shader.min.js"></script>
     <meta charset="UTF-8" />
     <title>SpaceOS VR – microbricks</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- VR-browser HTML shader -->
+    <script src="https://unpkg.com/aframe-html-shader/dist/aframe-html-shader.min.js"></script>
+
+    <!-- A‑Frame -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
     <style>
       body { margin: 0; }
     </style>
@@ -18,7 +23,7 @@
         <a-cursor></a-cursor>
       </a-entity>
 
-      <!-- Drie hoofdpanelen -->
+      <!-- Drie hoofdpanelen (decoratief) -->
       <a-plane position="-1 1.5 -3" width="1" height="0.6" color="#222" opacity="0.9">
         <a-text value="Notities" align="center" position="0 0 0.01"></a-text>
       </a-plane>
@@ -41,31 +46,44 @@
       </a-entity>
 
       <!-- Notities app -->
-      <a-plane id="notesApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#222">
+      <a-plane id="notesApp" visible="false"
+               position="0 1.5 -3" width="2" height="1.2" color="#222">
         <a-text value="Notities" position="-0.9 0.5 0.01"></a-text>
         <a-text id="notesText" value="Nog geen notities"
                 wrap-count="40" position="-0.9 0.2 0.01"></a-text>
-        <a-plane id="notesClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="red">
+        <a-plane id="notesClose" position="0.9 0.5 0.01"
+                 width="0.2" height="0.2" color="red">
           <a-text value="X" align="center" position="0 0 0.01"></a-text>
         </a-plane>
       </a-plane>
 
-      <!-- Browser app -->
-      <a-plane id="browserApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#333">
-        <a-text value="Browser" position="-0.9 0.5 0.01"></a-text>
-        <a-text value="Klik in dock om echte site te openen" wrap-count="40"
-                position="-0.9 0.2 0.01"></a-text>
-        <a-plane id="browserClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="red">
+      <!-- VR-browser app -->
+      <a-plane id="browserApp" visible="false"
+               position="0 1.5 -3" width="2.2" height="1.4" color="#333">
+        <a-text value="VR Browser" position="-0.9 0.6 0.01"></a-text>
+
+        <!-- Website in VR -->
+        <a-entity id="browserView"
+                  geometry="primitive: plane; width: 1.9; height: 1.1"
+                  material="shader: html; target: #webview;"
+                  position="0 0 0.01">
+        </a-entity>
+
+        <!-- Sluitknop -->
+        <a-plane id="browserClose" position="0.95 0.6 0.01"
+                 width="0.2" height="0.2" color="red">
           <a-text value="X" align="center" position="0 0 0.01"></a-text>
         </a-plane>
       </a-plane>
 
       <!-- Spotify app -->
-      <a-plane id="spotifyApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#1DB954">
+      <a-plane id="spotifyApp" visible="false"
+               position="0 1.5 -3" width="2" height="1.2" color="#1DB954">
         <a-text value="Spotify Controller" position="-0.9 0.5 0.01"></a-text>
         <a-text id="spotifyStatus" value="Niet verbonden met Spotify API"
                 wrap-count="40" position="-0.9 0.2 0.01"></a-text>
-        <a-plane id="spotifyClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="#0b3a1c">
+        <a-plane id="spotifyClose" position="0.9 0.5 0.01"
+                 width="0.2" height="0.2" color="#0b3a1c">
           <a-text value="X" align="center" position="0 0 0.01"></a-text>
         </a-plane>
       </a-plane>
@@ -73,7 +91,12 @@
       <a-sky color="#111"></a-sky>
     </a-scene>
 
-    <!-- Koppeling naar externe JS -->
+    <!-- Verborgen iframe voor VR-browser -->
+    <iframe id="webview" src="https://google.com"
+            style="width:1024px;height:768px;border:none;position:absolute;left:-9999px;">
+    </iframe>
+
+    <!-- Externe JS -->
     <script src="script.js"></script>
   </body>
 </html>
