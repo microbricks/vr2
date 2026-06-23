@@ -1,16 +1,23 @@
-<html>
+<!DOCTYPE html>
+<html lang="nl">
   <head>
+    <meta charset="UTF-8" />
+    <title>SpaceOS VR – microbricks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <style>
+      body { margin: 0; }
+    </style>
   </head>
   <body>
     <a-scene vr-mode-ui="enabled: true">
-      
-      <!-- Camera + cursor voor Cardboard -->
-      <a-entity camera look-controls>
+
+      <!-- Camera + Cardboard cursor -->
+      <a-entity id="cameraRig" camera look-controls>
         <a-cursor></a-cursor>
       </a-entity>
 
-      <!-- Panelen -->
+      <!-- Drie hoofdpanelen -->
       <a-plane position="-1 1.5 -3" width="1" height="0.6" color="#222" opacity="0.9">
         <a-text value="Notities" align="center" position="0 0 0.01"></a-text>
       </a-plane>
@@ -23,53 +30,49 @@
         <a-text value="Spotify" align="center" position="0 0 0.01"></a-text>
       </a-plane>
 
-      <!-- Dock onderaan -->
-      <a-entity position="0 0.5 -3">
-        <a-circle radius="0.15" color="#4A90E2" position="-0.6 0 0"></a-circle>
-        <a-circle radius="0.15" color="#7ED321" position="-0.3 0 0"></a-circle>
-        <a-circle radius="0.15" color="#F8E71C" position="0 0 0"></a-circle>
+      <!-- Dock -->
+      <a-entity id="dock" position="0 0.5 -3">
+        <a-circle id="openNotes"   radius="0.15" color="#4A90E2" position="-0.6 0 0"></a-circle>
+        <a-circle id="openBrowser" radius="0.15" color="#7ED321" position="-0.3 0 0"></a-circle>
+        <a-circle id="openSpotify" radius="0.15" color="#F8E71C" position="0 0 0"></a-circle>
         <a-circle radius="0.15" color="#D8D8D8" position="0.3 0 0"></a-circle>
         <a-circle radius="0.15" color="#9B9B9B" position="0.6 0 0"></a-circle>
       </a-entity>
 
-      <!-- Achtergrond -->
-      <a-sky color="#111"></a-sky>
+      <!-- Notities app -->
+      <a-plane id="notesApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#222">
+        <a-text value="Notities" position="-0.9 0.5 0.01"></a-text>
+        <a-text id="notesText" value="Nog geen notities"
+                wrap-count="40" position="-0.9 0.2 0.01"></a-text>
+        <a-plane id="notesClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="red">
+          <a-text value="X" align="center" position="0 0 0.01"></a-text>
+        </a-plane>
+      </a-plane>
 
+      <!-- Browser app -->
+      <a-plane id="browserApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#333">
+        <a-text value="Browser" position="-0.9 0.5 0.01"></a-text>
+        <a-text value="Klik in dock om echte site te openen" wrap-count="40"
+                position="-0.9 0.2 0.01"></a-text>
+        <a-plane id="browserClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="red">
+          <a-text value="X" align="center" position="0 0 0.01"></a-text>
+        </a-plane>
+      </a-plane>
+
+      <!-- Spotify app -->
+      <a-plane id="spotifyApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#1DB954">
+        <a-text value="Spotify Controller" position="-0.9 0.5 0.01"></a-text>
+        <a-text id="spotifyStatus" value="Niet verbonden met Spotify API"
+                wrap-count="40" position="-0.9 0.2 0.01"></a-text>
+        <a-plane id="spotifyClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="#0b3a1c">
+          <a-text value="X" align="center" position="0 0 0.01"></a-text>
+        </a-plane>
+      </a-plane>
+
+      <a-sky color="#111"></a-sky>
     </a-scene>
+
+    <!-- Koppeling naar externe JS -->
+    <script src="script.js"></script>
   </body>
 </html>
-
-<a-scene vr-mode-ui="enabled: true">
-
-  <!-- Camera + cursor -->
-  <a-entity id="cameraRig" camera look-controls>
-    <a-cursor></a-cursor>
-  </a-entity>
-
-  <!-- Dock -->
-  <a-entity id="dock" position="0 0.5 -3">
-    <a-circle id="openNotes" radius="0.15" color="#4A90E2" position="-0.6 0 0"></a-circle>
-    <a-circle id="openBrowser" radius="0.15" color="#7ED321" position="-0.3 0 0"></a-circle>
-    <a-circle id="openSpotify" radius="0.15" color="#F8E71C" position="0 0 0"></a-circle>
-  </a-entity>
-
-  <!-- Notities app -->
-  <a-plane id="notesApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#222">
-    <a-text id="notesText" value="Nog geen notities" wrap-count="40" position="-0.9 0.3 0.01"></a-text>
-    <a-plane id="notesClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="red"></a-plane>
-  </a-plane>
-
-  <!-- Browser app -->
-  <a-plane id="browserApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#333">
-    <a-text value="Browser" position="0 0.4 0.01"></a-text>
-    <a-plane id="browserClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="red"></a-plane>
-  </a-plane>
-
-  <!-- Spotify app -->
-  <a-plane id="spotifyApp" visible="false" position="0 1.5 -3" width="2" height="1.2" color="#1DB954">
-    <a-text value="Spotify Controller" position="0 0.4 0.01"></a-text>
-    <a-plane id="spotifyClose" position="0.9 0.5 0.01" width="0.2" height="0.2" color="red"></a-plane>
-  </a-plane>
-
-  <a-sky color="#111"></a-sky>
-</a-scene>
