@@ -150,8 +150,8 @@ function buildKeyboard() {
     }
   });
 
-  addKey('BACK', -0.5, -0.2);
-  addKey('ENTER', 0.5, -0.2);
+  addKey('BACK', -0.5, -1);
+  addKey('ENTER', 0.5, -1);
 }
 
 function addKey(label, x, y) {
