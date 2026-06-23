@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS VR (Joy-Con)</title>
+  <title>SpaceOS VR (Touch + Joy-Con)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style>
@@ -13,9 +13,12 @@
 
 <a-scene vr-mode-ui="enabled: true">
 
-  <!-- Camera -->
-  <a-entity id="cameraRig" camera look-controls>
-    <a-cursor></a-cursor>
+  <!-- Camera met raycaster voor touch/click -->
+  <a-entity id="cameraRig"
+            camera
+            look-controls
+            raycaster="objects: .clickable">
+    <a-cursor fuse="false"></a-cursor>
   </a-entity>
 
   <!-- Hand cursor (Joy-Con pointer) -->
@@ -27,8 +30,17 @@
 
   <!-- Dock -->
   <a-entity id="dock" position="0 0.5 -3">
-    <a-circle id="openBrowser" radius="0.15" color="#7ED321" position="-0.4 0 0"></a-circle>
-    <a-circle id="connectJoyCon" radius="0.15" color="#4A90E2" position="0.4 0 0"></a-circle>
+    <a-circle id="openBrowser"
+              radius="0.15"
+              color="#7ED321"
+              position="-0.4 0 0"
+              class="clickable"></a-circle>
+
+    <a-circle id="connectJoyCon"
+              radius="0.15"
+              color="#4A90E2"
+              position="0.4 0 0"
+              class="clickable"></a-circle>
   </a-entity>
 
   <!-- Browser -->
@@ -38,19 +50,28 @@
            color="#333">
     <a-text value="VR Browser" position="-1.1 0.9 0.01"></a-text>
 
-    <a-plane id="addressBar" width="2" height="0.25" color="#555" position="0 0.6 0.01">
-      <a-text id="addressText" value="https://example.com"
-              position="-0.95 0 0.01" wrap-count="60"></a-text>
+    <a-plane id="addressBar"
+             width="2"
+             height="0.25"
+             color="#555"
+             position="0 0.6 0.01">
+      <a-text id="addressText"
+              value="https://example.com"
+              position="-0.95 0 0.01"
+              wrap-count="60"></a-text>
     </a-plane>
 
     <a-entity id="browserContent" position="0 -0.1 0.01"></a-entity>
 
-    <a-plane id="browserClose" position="1.1 0.9 0.01"
-             width="0.2" height="0.2" color="red">
+    <a-plane id="browserClose"
+             position="1.1 0.9 0.01"
+             width="0.2" height="0.2"
+             color="red"
+             class="clickable">
       <a-text value="X" align="center" position="0 0 0.01"></a-text>
     </a-plane>
 
-    <a-entity id="keyboard" position="-2 -0.9 0.02"></a-entity>
+    <a-entity id="keyboard" position="0 -0.9 0.02"></a-entity>
   </a-plane>
 
   <a-sky color="#111"></a-sky>
