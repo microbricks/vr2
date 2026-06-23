@@ -15,22 +15,21 @@
   <body>
     <a-scene vr-mode-ui="enabled: true">
 
-      <!-- Camera -->
+      <!-- Camera + cursor -->
       <a-entity id="cameraRig" camera look-controls>
         <a-cursor></a-cursor>
       </a-entity>
 
       <!-- Dock -->
       <a-entity id="dock" position="0 0.5 -3">
-        <a-circle id="openNotes"   radius="0.15" color="#4A90E2" position="-0.6 0 0"></a-circle>
-        <a-circle id="openBrowser" radius="0.15" color="#7ED321" position="-0.3 0 0"></a-circle>
-        <a-circle id="openSpotify" radius="0.15" color="#F8E71C" position="0 0 0"></a-circle>
+        <a-circle id="openBrowser" radius="0.15" color="#7ED321" position="0 0 0"></a-circle>
       </a-entity>
 
-      <!-- Browser -->
+      <!-- VR-browser met toetsenbord -->
       <a-plane id="browserApp" visible="false"
                position="0 1.5 -3" width="2.4" height="2" color="#333">
 
+        <!-- Titel -->
         <a-text value="VR Browser" position="-1.1 0.9 0.01"></a-text>
 
         <!-- Adresbalk -->
@@ -39,7 +38,7 @@
                   position="-0.95 0 0.01" wrap-count="60"></a-text>
         </a-plane>
 
-        <!-- Browser content -->
+        <!-- Content container -->
         <a-entity id="browserContent" position="0 -0.1 0.01"></a-entity>
 
         <!-- Sluitknop -->
@@ -48,9 +47,8 @@
           <a-text value="X" align="center" position="0 0 0.01"></a-text>
         </a-plane>
 
-        <!-- VR toetsenbord -->
+        <!-- VR-toetsenbord -->
         <a-entity id="keyboard" position="0 -0.7 0.02"></a-entity>
-
       </a-plane>
 
       <a-sky color="#111"></a-sky>
