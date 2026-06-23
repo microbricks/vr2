@@ -1,4 +1,4 @@
-// Elementen ophalen
+// Elementen
 const notesApp     = document.querySelector('#notesApp');
 const browserApp   = document.querySelector('#browserApp');
 const spotifyApp   = document.querySelector('#spotifyApp');
@@ -12,22 +12,25 @@ const browserClose = document.querySelector('#browserClose');
 const spotifyClose = document.querySelector('#spotifyClose');
 
 const notesText    = document.querySelector('#notesText');
+const webview      = document.querySelector('#webview');
 
-// Apps openen via dock
+// Notities openen
 openNotes.addEventListener('click', () => {
   notesApp.setAttribute('visible', true);
 });
 
+// VR-browser openen
 openBrowser.addEventListener('click', () => {
   browserApp.setAttribute('visible', true);
-  window.open('https://google.com', '_blank'); // echte browser
+  webview.src = 'https://google.com'; // hier kun je later andere sites zetten
 });
 
+// Spotify openen (placeholder)
 openSpotify.addEventListener('click', () => {
   spotifyApp.setAttribute('visible', true);
 });
 
-// Apps sluiten
+// Sluiten
 notesClose.addEventListener('click', () => {
   notesApp.setAttribute('visible', false);
 });
