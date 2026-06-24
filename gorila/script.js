@@ -1,108 +1,136 @@
-const statusEl = document.querySelector('#status');
-const video = document.querySelector('#video');
-const offerQR = document.querySelector('#offerQR');
+// ===============================
+// JOY-CON DETECTIE
+// ===============================
+let leftJoycon = null;
+let rightJoycon = null;
 
-let pc = null;
-let dataChannel = null;
+window.addEventListener("gamepadconnected", () => {
+  const pads = navigator.getGamepads();
 
-const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+  for (const gp of pads) {
+    if (!gp) continue;
 
-// ====== CREATE OFFER + QR ======
-async function makeOffer() {
-  pc = new RTCPeerConnection(rtcConfig);
+    // Linker Joy-Con
+    if (gp.id.includes("Joy-Con (L)")) {
+      leftJoycon = gp.index;
+      console.log("Linker Joy-Con gevonden op kanaal", gp.index);
+    }
 
-  pc.ondatachannel = (e) => {
-    dataChannel = e.channel;
-    dataChannel.onmessage = (msg) => {
-      const data = JSON.parse(msg.data);
-      handleAction(data.action);
-    };
-    dataChannel.onopen = () => statusEl.textContent = "Verbonden!";
-  };
-
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-
-  new QRious({
-    element: offerQR,
-    size: 250,
-    value: JSON.stringify(offer)
-  });
-}
-
-makeOffer();
-
-// ====== SCAN ANSWER QR ======
-navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-  video.srcObject = stream;
-  scanLoop();
+    // Rechter Joy-Con
+    if (gp.id.includes("Joy-Con (R)")) {
+      rightJoycon = gp.index;
+      console.log("Rechter Joy-Con gevonden op kanaal", gp.index);
+    }
+  }
 });
 
-function scanLoop() {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
+// ===============================
+// GORILLA LOCOMOTION VARIABELEN
+// ===============================
+const rig = document.querySelector('#cameraRig');
 
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+let velocityY = 0;
+let grounded = true;
+const gravity = -0.01;
 
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const code = jsQR(img.data, canvas.width, canvas.height);
+const armSwingForce = 0.06;   // snelheid vooruit
+const jumpForce = 0.18;       // springkracht
+const climbForce = 0.10;      // klimkracht
 
-  if (code) {
-    const answer = JSON.parse(code.data);
-    pc.setRemoteDescription(answer);
-    statusEl.textContent = "Answer ontvangen!";
-    video.srcObject.getTracks().forEach(t => t.stop());
-    return;
+// Vorige Y-positie van sticks (arm swing detectie)
+let prevLeftY = 0;
+let prevRightY = 0;
+
+// ===============================
+// GORILLA TAG BEWEGING
+// ===============================
+function gorillaMove() {
+  const pads = navigator.getGamepads();
+
+  // -------------------------------
+  // 1. ARM SWING LOCOMOTION
+  // -------------------------------
+  if (leftJoycon !== null) {
+    const gp = pads[leftJoycon];
+    if (gp) {
+      const ly = gp.axes[1];
+      const swing = prevLeftY - ly;
+
+      if (swing > 0.25) moveForward();
+      prevLeftY = ly;
+    }
   }
 
-  requestAnimationFrame(scanLoop);
+  if (rightJoycon !== null) {
+    const gp = pads[rightJoycon];
+    if (gp) {
+      const ry = gp.axes[1];
+      const swing = prevRightY - ry;
+
+      if (swing > 0.25) moveForward();
+      prevRightY = ry;
+    }
+  }
+
+  // -------------------------------
+  // 2. JUMP (A-knop)
+  // -------------------------------
+  if (rightJoycon !== null) {
+    const gp = pads[rightJoycon];
+    if (gp && gp.buttons[0].pressed && grounded) {
+      velocityY = jumpForce;
+      grounded = false;
+    }
+  }
+
+  // -------------------------------
+  // 3. CLIMB (X-knop)
+  // -------------------------------
+  if (rightJoycon !== null) {
+    const gp = pads[rightJoycon];
+    if (gp && gp.buttons[2].pressed) {
+      rig.object3D.position.y += climbForce;
+    }
+  }
+
+  // -------------------------------
+  // 4. TAG EFFECT (B-knop)
+  // -------------------------------
+  if (rightJoycon !== null) {
+    const gp = pads[rightJoycon];
+    if (gp && gp.buttons[1].pressed) {
+      rig.object3D.position.y += 0.1;
+      setTimeout(() => rig.object3D.position.y -= 0.1, 150);
+    }
+  }
+
+  // -------------------------------
+  // 5. GRAVITY
+  // -------------------------------
+  if (!grounded) {
+    velocityY += gravity;
+    rig.object3D.position.y += velocityY;
+
+    if (rig.object3D.position.y <= 1.6) {
+      rig.object3D.position.y = 1.6;
+      velocityY = 0;
+      grounded = true;
+    }
+  }
+
+  requestAnimationFrame(gorillaMove);
 }
 
-// ====== MOVEMENT ======
-const rig = document.querySelector('#cameraRig');
-let velY = 0, grounded = true;
+gorillaMove();
 
-function handleAction(a) {
-  if (a === "forward") moveForward();
-  if (a === "jump") jump();
-  if (a === "climb") climb();
-  if (a === "tag") tag();
-}
-
+// ===============================
+// BEWEGING FUNCTIE
+// ===============================
 function moveForward() {
-  const dir = new THREE.Vector3(0,0,-1);
+  const dir = new THREE.Vector3(0, 0, -1);
   rig.object3D.getWorldDirection(dir);
   dir.y = 0;
   dir.normalize();
-  dir.multiplyScalar(0.08);
+  dir.multiplyScalar(armSwingForce);
   rig.object3D.position.add(dir);
 }
-
-function jump() {
-  if (grounded) { velY = 0.18; grounded = false; }
-}
-
-function climb() {
-  rig.object3D.position.y += 0.08;
-}
-
-function tag() {
-  rig.object3D.position.y += 0.1;
-  setTimeout(()=>rig.object3D.position.y-=0.1,150);
-}
-
-function loop() {
-  if (!grounded) {
-    velY -= 0.01;
-    rig.object3D.position.y += velY;
-    if (rig.object3D.position.y <= 1.6) {
-      rig.object3D.position.y = 1.6;
-      grounded = true;
-      velY = 0;
-    }
-  }
-  requestAnimationFrame(loop);
-}
-loop();
