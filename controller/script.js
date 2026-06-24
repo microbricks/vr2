@@ -8,7 +8,6 @@ const offerOut = document.querySelector('#offerOut');
 const answerIn = document.querySelector('#answerIn');
 const setAnswerBtn = document.querySelector('#setAnswerBtn');
 
-// STUN server voor NAT traversal
 const rtcConfig = {
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
 };
