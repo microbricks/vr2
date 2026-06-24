@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS VR (Apps + Gaze)</title>
+  <title>SpaceOS VR (Apps + Keyboard + Gaze)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
@@ -35,13 +35,18 @@
   <!-- Browser -->
   <a-plane id="browserApp" visible="false" position="0 1.5 -3" width="2.4" height="2" color="#333">
     <a-text value="VR Browser" position="-1.1 0.9 0.01"></a-text>
+
     <a-plane id="addressBar" width="2" height="0.25" color="#555" position="0 0.6 0.01">
       <a-text id="addressText" value="https://example.com" position="-0.95 0 0.01" wrap-count="60"></a-text>
     </a-plane>
+
     <a-entity id="browserContent" position="0 -0.1 0.01"></a-entity>
+
     <a-plane id="browserClose" position="1.1 0.9 0.01" width="0.2" height="0.2" color="red" class="clickable">
       <a-text value="X" align="center" position="0 0 0.01"></a-text>
     </a-plane>
+
+    <!-- VR Keyboard -->
     <a-entity id="keyboard" position="0 -0.9 0.02"></a-entity>
   </a-plane>
 
@@ -58,9 +63,11 @@
   <a-plane id="notesApp" visible="false" position="1.5 1.5 -3" width="1.8" height="1.1" color="#222">
     <a-text value="Notities" position="-0.8 0.4 0.01"></a-text>
     <a-text id="notesText" value="- Eerste notitie" position="-0.8 0.1 0.01" wrap-count="32"></a-text>
+
     <a-plane id="notesAdd" position="-0.4 -0.3 0.01" width="0.5" height="0.25" color="#4A90E2" class="clickable">
       <a-text value="+ Notitie" align="center" position="0 0 0.01"></a-text>
     </a-plane>
+
     <a-plane id="notesClose" position="0.8 0.4 0.01" width="0.2" height="0.2" color="red" class="clickable">
       <a-text value="X" align="center" position="0 0 0.01"></a-text>
     </a-plane>
