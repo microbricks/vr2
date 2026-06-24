@@ -7,9 +7,20 @@ const browserClose   = document.querySelector('#browserClose');
 const browserContent = document.querySelector('#browserContent');
 const addressText    = document.querySelector('#addressText');
 const keyboard       = document.querySelector('#keyboard');
+
 const cameraRig      = document.querySelector('#cameraRig');
 const handCursor     = document.querySelector('#handCursor');
-const dummyButton    = document.querySelector('#dummyButton');
+
+const openClock      = document.querySelector('#openClock');
+const clockApp       = document.querySelector('#clockApp');
+const clockText      = document.querySelector('#clockText');
+const clockClose     = document.querySelector('#clockClose');
+
+const openNotes      = document.querySelector('#openNotes');
+const notesApp       = document.querySelector('#notesApp');
+const notesText      = document.querySelector('#notesText');
+const notesAdd       = document.querySelector('#notesAdd');
+const notesClose     = document.querySelector('#notesClose');
 
 let scrollOffset = 0;
 
@@ -25,12 +36,6 @@ openBrowser.addEventListener('click', () => {
 
 browserClose.addEventListener('click', () => {
   browserApp.setAttribute('visible', false);
-  pulseCursor();
-});
-
-// Dummy knop
-dummyButton.addEventListener('click', () => {
-  console.log("Blauwe knop werkt");
   pulseCursor();
 });
 
@@ -203,6 +208,45 @@ function pressKey(label) {
 }
 
 // -----------------------------
+// CLOCK APP
+// -----------------------------
+openClock.addEventListener('click', () => {
+  clockApp.setAttribute('visible', true);
+  pulseCursor();
+});
+
+clockClose.addEventListener('click', () => {
+  clockApp.setAttribute('visible', false);
+  pulseCursor();
+});
+
+setInterval(() => {
+  const now = new Date();
+  const t = now.toTimeString().split(' ')[0];
+  clockText.setAttribute('value', t);
+}, 500);
+
+// -----------------------------
+// NOTES APP
+// -----------------------------
+openNotes.addEventListener('click', () => {
+  notesApp.setAttribute('visible', true);
+  pulseCursor();
+});
+
+notesClose.addEventListener('click', () => {
+  notesApp.setAttribute('visible', false);
+  pulseCursor();
+});
+
+notesAdd.addEventListener('click', () => {
+  const current = notesText.getAttribute('value');
+  const line = `- Notitie ${Math.floor(Math.random() * 100)}`;
+  notesText.setAttribute('value', current + '\n' + line);
+  pulseCursor();
+});
+
+// -----------------------------
 // DOT PULSE (groter bij click)
 // -----------------------------
 let pulseTimer = null;
@@ -216,7 +260,7 @@ function pulseCursor() {
 }
 
 // -----------------------------
-// GAZE CLICK (werkt 100%)
+// GAZE CLICK
 // -----------------------------
 let gazeTarget = null;
 let gazeStart = 0;
