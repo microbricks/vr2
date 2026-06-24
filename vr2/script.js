@@ -11,9 +11,6 @@ const cameraRig      = document.querySelector('#cameraRig');
 const handCursor     = document.querySelector('#handCursor');
 
 let scrollOffset = 0;
-let gazeTarget = null;
-let gazeStartTime = 0;
-const gazeDelay = 1000; // 1 seconde
 
 // -----------------------------
 // BROWSER OPENEN / SLUITEN
@@ -22,10 +19,19 @@ openBrowser.addEventListener('click', () => {
   browserApp.setAttribute('visible', true);
   loadPage('https://example.com');
   buildKeyboard();
+  pulseCursor(); // feedback bij click
 });
 
 browserClose.addEventListener('click', () => {
   browserApp.setAttribute('visible', false);
+  pulseCursor();
+});
+
+// Dummy knop voor testen
+const dummyButton = document.querySelector('#dummyButton');
+dummyButton.addEventListener('click', () => {
+  console.log('Dummy button clicked');
+  pulseCursor();
 });
 
 // -----------------------------
@@ -95,7 +101,10 @@ function renderContent(items) {
       btn.appendChild(txt);
       browserContent.appendChild(btn);
 
-      btn.addEventListener('click', () => loadPage(item.href));
+      btn.addEventListener('click', () => {
+        loadPage(item.href);
+        pulseCursor();
+      });
 
       y -= 0.2;
     }
@@ -173,7 +182,10 @@ function addKey(label, x, y) {
   key.appendChild(txt);
   keyboard.appendChild(key);
 
-  key.addEventListener('click', () => pressKey(label));
+  key.addEventListener('click', () => {
+    pressKey(label);
+    pulseCursor();
+  });
 }
 
 function pressKey(label) {
@@ -183,7 +195,6 @@ function pressKey(label) {
     current = current.slice(0, -1);
   } else if (label === 'ENTER') {
     loadPage(current);
-    return;
   } else {
     current += label.toLowerCase();
   }
@@ -192,10 +203,22 @@ function pressKey(label) {
 }
 
 // -----------------------------
-// HEAD-TRACKING MOTION CURSOR
+// DOT ALTIJD IN HET MIDDEN
 // -----------------------------
-// Dot altijd in het midden
-handCursor.setAttribute("position", "0 0 -2.5");
+handCursor.setAttribute('position', '0 0 -2.5');
+
+// -----------------------------
+// CURSOR PULSE (groter bij click/gaze)
+// -----------------------------
+let pulseTimeout = null;
+
+function pulseCursor() {
+  handCursor.setAttribute('radius', 0.06);
+  if (pulseTimeout) clearTimeout(pulseTimeout);
+  pulseTimeout = setTimeout(() => {
+    handCursor.setAttribute('radius', 0.03);
+  }, 150);
+}
 
 // -----------------------------
 // GAZE CLICK (auto-click)
@@ -229,7 +252,8 @@ function updateGazeClick() {
     } else {
       if (performance.now() - gazeStartTime > gazeDelay) {
         targetEl.emit('click');
-        gazeStartTime = performance.now() + 999999; // voorkomt dubbel klikken
+        pulseCursor();
+        gazeStartTime = performance.now() + 999999;
       }
     }
   } else {
