@@ -2,32 +2,25 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Gorilla Tag VR (QR Pairing)</title>
+  <title>Gorilla Tag VR Joy-Con</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="vr.js"></script>
 </head>
 <body>
 
-<a-scene>
+<a-scene vr-mode-ui="enabled: true">
+
+  <!-- Camera rig voor beweging -->
   <a-entity id="cameraRig" position="0 1.6 0">
     <a-entity camera look-controls></a-entity>
   </a-entity>
 
-  <a-plane color="#228B22" width="30" height="30" rotation="-90 0 0"></a-plane>
+  <!-- Simpele wereld -->
+  <a-plane color="#228B22" width="40" height="40" rotation="-90 0 0"></a-plane>
   <a-sky color="#87CEEB"></a-sky>
+
 </a-scene>
 
-<div style="position:fixed;bottom:0;left:0;right:0;background:#000a;color:#fff;padding:10px;font-family:system-ui;">
-  <b>VR QR‑pairing</b><br>
-  <canvas id="offerQR"></canvas><br><br>
-
-  <b>Scan iPad QR‑code</b><br>
-  <video id="video" autoplay style="width:100%;"></video>
-  <div id="status">Status: wacht op iPad…</div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
-<script src="vr.js"></script>
 </body>
 </html>
