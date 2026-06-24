@@ -191,15 +191,5 @@ function pressKey(label) {
 // -----------------------------
 // HEAD-TRACKING MOTION CURSOR
 // -----------------------------
-function updateMotionCursor() {
-  const rot = cameraRig.object3D.rotation;
-
-  const x = -rot.y * 1.5;
-  const y = 1.5 - rot.x * 1.2;
-
-  handCursor.setAttribute("position", `${x} ${y} -2.5`);
-
-  requestAnimationFrame(updateMotionCursor);
-}
-
-0 0 -2.5
+// Dot altijd in het midden
+handCursor.setAttribute("position", "0 0 -2.5");
