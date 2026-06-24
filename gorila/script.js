@@ -11,7 +11,6 @@ function handleAction(action) {
   actionQueue.push(action);
 }
 
-// WebRTC
 const offerIn = document.querySelector('#offerIn');
 const setOfferBtn = document.querySelector('#setOfferBtn');
 const answerOut = document.querySelector('#answerOut');
@@ -63,7 +62,6 @@ setOfferBtn.addEventListener('click', async () => {
   vrStatus.textContent = 'Status: answer gemaakt, kopieer naar iPad';
 });
 
-// Gorilla loop
 function update() {
   while (actionQueue.length > 0) {
     const action = actionQueue.shift();
