@@ -1,49 +1,37 @@
 const cameraRig = document.querySelector('#cameraRig');
-const leftHand  = document.querySelector('#leftHand');
-const rightHand = document.querySelector('#rightHand');
 
 let velocityY = 0;
 const gravity = -0.01;
 let isGrounded = true;
 
-// vorige handposities
-let prevLeftY  = null;
-let prevRightY = null;
+const forwardSpeed = 0.08;
 
-// snelheid
-const forwardSpeed = 0.05;
+// simpele action queue
+let actionQueue = [];
+
+// wordt aangeroepen door WebSocket-server (zie hieronder)
+function handleAction(action) {
+  actionQueue.push(action);
+}
 
 // main loop
 function update() {
-  const headPos  = new THREE.Vector3();
-  const leftPos  = new THREE.Vector3();
-  const rightPos = new THREE.Vector3();
-
-  cameraRig.object3D.getWorldPosition(headPos);
-  leftHand.object3D.getWorldPosition(leftPos);
-  rightHand.object3D.getWorldPosition(rightPos);
-
-  if (prevLeftY === null) {
-    prevLeftY  = leftPos.y;
-    prevRightY = rightPos.y;
+  // verwerk alle acties
+  while (actionQueue.length > 0) {
+    const action = actionQueue.shift();
+    if (action === 'forward') {
+      moveForward();
+    }
+    if (action === 'jump') {
+      jump();
+    }
+    if (action === 'climb') {
+      climb();
+    }
+    if (action === 'tag') {
+      tagEffect();
+    }
   }
-
-  const leftDeltaY  = leftPos.y  - prevLeftY;
-  const rightDeltaY = rightPos.y - prevRightY;
-
-  // handen omlaag bewegen = vooruit
-  const swingThreshold = -0.02;
-  if (leftDeltaY < swingThreshold || rightDeltaY < swingThreshold) {
-    const dir = new THREE.Vector3(0, 0, -1);
-    cameraRig.object3D.getWorldDirection(dir);
-    dir.y = 0;
-    dir.normalize();
-    dir.multiplyScalar(forwardSpeed);
-    cameraRig.object3D.position.add(dir);
-  }
-
-  prevLeftY  = leftPos.y;
-  prevRightY = rightPos.y;
 
   // gravity
   if (!isGrounded) {
@@ -63,10 +51,30 @@ function update() {
 
 update();
 
-// jump
-document.addEventListener('click', () => {
+function moveForward() {
+  const dir = new THREE.Vector3(0, 0, -1);
+  cameraRig.object3D.getWorldDirection(dir);
+  dir.y = 0;
+  dir.normalize();
+  dir.multiplyScalar(forwardSpeed);
+  cameraRig.object3D.position.add(dir);
+}
+
+function jump() {
   if (isGrounded) {
     velocityY = 0.18;
     isGrounded = false;
   }
-});
+}
+
+function climb() {
+  cameraRig.object3D.position.y += 0.08;
+}
+
+function tagEffect() {
+  // simpele feedback: camera even omhoog en omlaag
+  cameraRig.object3D.position.y += 0.1;
+  setTimeout(() => {
+    cameraRig.object3D.position.y -= 0.1;
+  }, 150);
+}
