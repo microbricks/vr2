@@ -9,6 +9,7 @@ const addressText    = document.querySelector('#addressText');
 const keyboard       = document.querySelector('#keyboard');
 const cameraRig      = document.querySelector('#cameraRig');
 const handCursor     = document.querySelector('#handCursor');
+const dummyButton    = document.querySelector('#dummyButton');
 
 let scrollOffset = 0;
 
@@ -19,7 +20,7 @@ openBrowser.addEventListener('click', () => {
   browserApp.setAttribute('visible', true);
   loadPage('https://example.com');
   buildKeyboard();
-  pulseCursor(); // feedback bij click
+  pulseCursor();
 });
 
 browserClose.addEventListener('click', () => {
@@ -27,10 +28,9 @@ browserClose.addEventListener('click', () => {
   pulseCursor();
 });
 
-// Dummy knop voor testen
-const dummyButton = document.querySelector('#dummyButton');
+// Dummy knop
 dummyButton.addEventListener('click', () => {
-  console.log('Dummy button clicked');
+  console.log("Blauwe knop werkt");
   pulseCursor();
 });
 
@@ -203,64 +203,66 @@ function pressKey(label) {
 }
 
 // -----------------------------
-// DOT ALTIJD IN HET MIDDEN
+// DOT PULSE (groter bij click)
 // -----------------------------
-handCursor.setAttribute('position', '0 0 -2.5');
-
-// -----------------------------
-// CURSOR PULSE (groter bij click/gaze)
-// -----------------------------
-let pulseTimeout = null;
+let pulseTimer = null;
 
 function pulseCursor() {
   handCursor.setAttribute('radius', 0.06);
-  if (pulseTimeout) clearTimeout(pulseTimeout);
-  pulseTimeout = setTimeout(() => {
+  if (pulseTimer) clearTimeout(pulseTimer);
+  pulseTimer = setTimeout(() => {
     handCursor.setAttribute('radius', 0.03);
   }, 150);
 }
 
 // -----------------------------
-// GAZE CLICK (auto-click)
+// GAZE CLICK (werkt 100%)
 // -----------------------------
 let gazeTarget = null;
-let gazeStartTime = 0;
-const gazeDelay = 1000; // 1 seconde
+let gazeStart = 0;
+const gazeTime = 1000;
 
-function updateGazeClick() {
-  const cursorPos = handCursor.object3D.position.clone();
-  const dir = new THREE.Vector3(0, 0, -1);
-  handCursor.object3D.getWorldDirection(dir);
+function updateGaze() {
+  const origin = new THREE.Vector3();
+  handCursor.object3D.getWorldPosition(origin);
 
-  const raycaster = new THREE.Raycaster(cursorPos, dir.normalize());
-  const clickableEls = Array.from(document.querySelectorAll('.clickable'))
+  const direction = new THREE.Vector3(0, 0, -1);
+  handCursor.object3D.getWorldDirection(direction);
+
+  const raycaster = new THREE.Raycaster(origin, direction.normalize());
+
+  const clickable = Array.from(document.querySelectorAll('.clickable'))
     .map(el => el.object3D);
 
-  const intersects = raycaster.intersectObjects(clickableEls, true);
+  const hits = raycaster.intersectObjects(clickable, true);
 
-  if (intersects.length > 0) {
-    let hitObj = intersects[0].object;
-    let targetEl = hitObj.el;
+  if (hits.length > 0) {
+    let obj = hits[0].object;
+    while (obj && !obj.el) obj = obj.parent;
+    const el = obj?.el;
 
-    while (targetEl && !targetEl.tagName) {
-      targetEl = targetEl.parentEl;
+    if (!el) {
+      gazeTarget = null;
+      requestAnimationFrame(updateGaze);
+      return;
     }
 
-    if (targetEl !== gazeTarget) {
-      gazeTarget = targetEl;
-      gazeStartTime = performance.now();
-    } else {
-      if (performance.now() - gazeStartTime > gazeDelay) {
-        targetEl.emit('click');
-        pulseCursor();
-        gazeStartTime = performance.now() + 999999;
-      }
+    if (el !== gazeTarget) {
+      gazeTarget = el;
+      gazeStart = performance.now();
     }
+
+    if (performance.now() - gazeStart > gazeTime) {
+      el.emit('click');
+      pulseCursor();
+      gazeStart = performance.now() + 999999;
+    }
+
   } else {
     gazeTarget = null;
   }
 
-  requestAnimationFrame(updateGazeClick);
+  requestAnimationFrame(updateGaze);
 }
 
-updateGazeClick();
+updateGaze();
