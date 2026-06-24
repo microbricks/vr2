@@ -1,64 +1,72 @@
 const statusEl = document.querySelector('#status');
+const video = document.querySelector('#video');
+const qrCanvas = document.querySelector('#qrCanvas');
 
 let pc = null;
 let dataChannel = null;
 
-const makeOfferBtn = document.querySelector('#makeOfferBtn');
-const offerOut = document.querySelector('#offerOut');
-const answerIn = document.querySelector('#answerIn');
-const setAnswerBtn = document.querySelector('#setAnswerBtn');
+// WebRTC config
+const rtcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
-const rtcConfig = {
-  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+// ====== QR SCANNER ======
+document.querySelector('#startScanBtn').onclick = async () => {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+  video.srcObject = stream;
+  scanLoop();
 };
 
-async function createConnection() {
-  pc = new RTCPeerConnection(rtcConfig);
+function scanLoop() {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
 
-  dataChannel = pc.createDataChannel('input');
-  dataChannel.onopen = () => {
-    statusEl.textContent = 'Status: WebRTC verbonden';
-  };
-  dataChannel.onclose = () => {
-    statusEl.textContent = 'Status: WebRTC kanaal gesloten';
-  };
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
-  pc.onicecandidate = (e) => {
-    if (!e.candidate && pc.localDescription) {
-      offerOut.value = JSON.stringify(pc.localDescription);
-    }
-  };
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(img.data, canvas.width, canvas.height);
+
+  if (code) {
+    const offer = JSON.parse(code.data);
+    startWebRTC(offer);
+    video.srcObject.getTracks().forEach(t => t.stop());
+    return;
+  }
+
+  requestAnimationFrame(scanLoop);
 }
 
-makeOfferBtn.addEventListener('click', async () => {
-  await createConnection();
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  statusEl.textContent = 'Status: offer gemaakt, kopieer naar VR';
-});
+// ====== WEBRTC ======
+async function startWebRTC(offer) {
+  pc = new RTCPeerConnection(rtcConfig);
 
-setAnswerBtn.addEventListener('click', async () => {
-  const txt = answerIn.value.trim();
-  if (!txt) return;
-  const answer = JSON.parse(txt);
-  await pc.setRemoteDescription(answer);
-  statusEl.textContent = 'Status: answer gezet, wacht op datachannel open';
-});
+  pc.ondatachannel = (e) => {
+    dataChannel = e.channel;
+    dataChannel.onopen = () => statusEl.textContent = "Verbonden!";
+  };
 
+  await pc.setRemoteDescription(offer);
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  // QR terug naar VR
+  new QRious({
+    element: qrCanvas,
+    size: 250,
+    value: JSON.stringify(answer)
+  });
+
+  statusEl.textContent = "Scan deze QR in VR";
+}
+
+// ====== ACTION SEND ======
 function sendAction(action) {
-  if (dataChannel && dataChannel.readyState === 'open') {
+  if (dataChannel && dataChannel.readyState === "open") {
     dataChannel.send(JSON.stringify({ action }));
-    statusEl.textContent = 'Laatste actie: ' + action;
-  } else {
-    statusEl.textContent = 'Kanaal niet open (actie niet verstuurd)';
+    statusEl.textContent = "Actie: " + action;
   }
 }
 
 document.querySelectorAll('.btn').forEach(btn => {
-  const handler = () => {
-    const action = btn.getAttribute('data-action');
-    sendAction(action);
-  };
-  btn.addEventListener('touchstart', handler);
-  btn.addEventListener('click', handler);
+  btn.addEventListener('click', () => sendAction(btn.dataset.action));
 });
