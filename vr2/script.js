@@ -9,7 +9,6 @@ const addressText    = document.querySelector('#addressText');
 const keyboard       = document.querySelector('#keyboard');
 const cameraRig      = document.querySelector('#cameraRig');
 const handCursor     = document.querySelector('#handCursor');
-const connectJoyCon  = document.querySelector('#connectJoyCon');
 
 let scrollOffset = 0;
 
@@ -190,110 +189,17 @@ function pressKey(label) {
 }
 
 // -----------------------------
-// JOY-CONS VIA GAMEPAD API
+// HEAD-TRACKING MOTION CURSOR
 // -----------------------------
-let useGamepad = false;
-let lastAPressed = false;
+function updateMotionCursor() {
+  const rot = cameraRig.object3D.rotation;
 
-function connectJoyConHandler() {
-  if (!('getGamepads' in navigator)) {
-    alert('Gamepad API wordt niet ondersteund in deze browser.');
-    return;
-  }
+  const x = -rot.y * 1.5;
+  const y = 1.5 - rot.x * 1.2;
 
-  useGamepad = true;
-  alert('Koppel nu je Joy-Con via Bluetooth aan je telefoon.\nDaarna werkt de stick + A-knop.');
+  handCursor.setAttribute("position", `${x} ${y} -2.5`);
+
+  requestAnimationFrame(updateMotionCursor);
 }
 
-connectJoyCon.addEventListener('click', connectJoyConHandler);
-
-// Polling loop
-function gamepadLoop() {
-  if (useGamepad) {
-    const pads = navigator.getGamepads ? navigator.getGamepads() : [];
-    const pad = pads[0];
-
-    if (pad) {
-      // Meestal: axes[0] = X, axes[1] = Y van linker stick
-      let ax = 0;
-let ay = 0;
-
-// 1. Probeer echte stick (axes)
-if (pad.axes && pad.axes.length >= 2) {
-  ax = pad.axes[0];
-  ay = pad.axes[1];
-}
-
-// 2. Als stick NIET werkt → gebruik D-pad knoppen
-// Joy-Con D-pad knoppen (meestal):
-// button 12 = up
-// button 13 = down
-// button 14 = left
-// button 15 = right
-
-if (pad.buttons[12]?.pressed) ay = -1;
-if (pad.buttons[13]?.pressed) ay = +1;
-if (pad.buttons[14]?.pressed) ax = -1;
-if (pad.buttons[15]?.pressed) ax = +1;
-
-// Normaliseer naar 0..1
-const nx = (ax + 1) / 2;
-const ny = (ay + 1) / 2;
-
-updateJoyConCursor(nx, ny);
-
-
-      // ax/ay zijn tussen -1 en 1
-      const nx = (ax + 1) / 2;      // 0..1
-      const ny = (ay + 1) / 2;      // 0..1
-
-      updateJoyConCursor(nx, ny);
-
-      // Meestal: button 0 = A / hoofdknop
-      const aPressed = pad.buttons[0] && pad.buttons[0].pressed;
-
-      if (aPressed && !lastAPressed) {
-        joyConClick();
-      }
-      lastAPressed = aPressed;
-    }
-  }
-
-  requestAnimationFrame(gamepadLoop);
-}
-
-gamepadLoop();
-
-function updateJoyConCursor(nx, ny) {
-  const x = (nx - 0.5) * 2.0;
-  const y = 1.6 - ny * 0.8;
-  handCursor.setAttribute('position', `${x} ${y} -2.5`);
-}
-
-// -----------------------------
-// JOY-CON CLICK → RAYCAST CLICK
-// -----------------------------
-function joyConClick() {
-  const cursorPos = handCursor.object3D.position.clone();
-  const dir = new THREE.Vector3(0, 0, -1);
-  handCursor.object3D.getWorldDirection(dir);
-
-  const raycaster = new THREE.Raycaster(cursorPos, dir.normalize());
-  const clickableEls = Array.from(document.querySelectorAll('.clickable'))
-    .map(el => el.object3D);
-
-  const intersects = raycaster.intersectObjects(clickableEls, true);
-
-  if (intersects.length > 0) {
-    const hitObj = intersects[0].object;
-    let targetEl = hitObj.el;
-
-    while (targetEl && !targetEl.tagName) {
-      targetEl = targetEl.parentEl;
-    }
-
-    if (targetEl) {
-      targetEl.emit('click');
-    }
-  }
-}
+updateMotionCursor();
