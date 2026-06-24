@@ -3,25 +3,35 @@ const handCursor = document.querySelector('#handCursor');
 const cameraRig  = document.querySelector('#cameraRig');
 
 // Browser
-const openBrowser = document.querySelector('#openBrowser');
-const browserApp  = document.querySelector('#browserApp');
-const browserClose = document.querySelector('#browserClose');
+const openBrowser    = document.querySelector('#openBrowser');
+const browserApp     = document.querySelector('#browserApp');
+const browserClose   = document.querySelector('#browserClose');
 const browserContent = document.querySelector('#browserContent');
-const addressText = document.querySelector('#addressText');
-const keyboard = document.querySelector('#keyboard');
+const addressText    = document.querySelector('#addressText');
+const keyboard       = document.querySelector('#keyboard');
 
 // Clock
-const openClock = document.querySelector('#openClock');
-const clockApp  = document.querySelector('#clockApp');
-const clockText = document.querySelector('#clockText');
+const openClock  = document.querySelector('#openClock');
+const clockApp   = document.querySelector('#clockApp');
+const clockText  = document.querySelector('#clockText');
 const clockClose = document.querySelector('#clockClose');
 
 // Notes
-const openNotes = document.querySelector('#openNotes');
-const notesApp  = document.querySelector('#notesApp');
-const notesText = document.querySelector('#notesText');
-const notesAdd  = document.querySelector('#notesAdd');
-const notesClose = document.querySelector('#notesClose');
+const openNotes      = document.querySelector('#openNotes');
+const notesApp       = document.querySelector('#notesApp');
+const notesText      = document.querySelector('#notesText');
+const notesAdd       = document.querySelector('#notesAdd');
+const notesClose     = document.querySelector('#notesClose');
+const notesKeyboard  = document.querySelector('#notesKeyboard');
+
+// Settings
+const openSettings  = document.querySelector('#openSettings');
+const settingsApp   = document.querySelector('#settingsApp');
+const settingsClose = document.querySelector('#settingsClose');
+const cursorSmall   = document.querySelector('#cursorSmall');
+const cursorLarge   = document.querySelector('#cursorLarge');
+const gazeFast      = document.querySelector('#gazeFast');
+const gazeSlow      = document.querySelector('#gazeSlow');
 
 // DOT PULSE
 let pulseTimer = null;
@@ -72,11 +82,15 @@ async function loadPage(url) {
 function extractContent(doc) {
   const items = [];
   doc.body.querySelectorAll('*').forEach(el => {
-    if (el.tagName === 'IMG' && el.src) items.push({type:'image',src:el.src});
-    else if (el.tagName === 'A' && el.href) items.push({type:'link',text:el.innerText||el.href,href:el.href});
-    else if (el.innerText.trim().length > 0) items.push({type:'text',text:el.innerText});
+    if (el.tagName === 'IMG' && el.src) {
+      items.push({ type: 'image', src: el.src });
+    } else if (el.tagName === 'A' && el.href) {
+      items.push({ type: 'link', text: el.innerText || el.href, href: el.href });
+    } else if (el.innerText && el.innerText.trim().length > 0) {
+      items.push({ type: 'text', text: el.innerText });
+    }
   });
-  return items.slice(0,120);
+  return items.slice(0, 120);
 }
 
 function renderContent(items) {
@@ -92,16 +106,16 @@ function renderContent(items) {
     }
     if (item.type === 'link') {
       const btn = document.createElement('a-plane');
-      btn.setAttribute('width','2');
-      btn.setAttribute('height','0.15');
-      btn.setAttribute('color','#2a6df4');
-      btn.setAttribute('position',`0 ${y} 0`);
-      btn.setAttribute('class','clickable');
+      btn.setAttribute('width', '2');
+      btn.setAttribute('height', '0.15');
+      btn.setAttribute('color', '#2a6df4');
+      btn.setAttribute('position', `0 ${y} 0`);
+      btn.setAttribute('class', 'clickable');
 
       const txt = document.createElement('a-text');
       txt.setAttribute('value', item.text);
-      txt.setAttribute('position','-0.95 0 0.01');
-      txt.setAttribute('wrap-count',60);
+      txt.setAttribute('position', '-0.95 0 0.01');
+      txt.setAttribute('wrap-count', 60);
 
       btn.appendChild(txt);
       browserContent.appendChild(btn);
@@ -116,9 +130,9 @@ function renderContent(items) {
     if (item.type === 'image') {
       const img = document.createElement('a-image');
       img.setAttribute('src', item.src);
-      img.setAttribute('width','2');
-      img.setAttribute('height','1');
-      img.setAttribute('position',`0 ${y} 0`);
+      img.setAttribute('width', '2');
+      img.setAttribute('height', '1');
+      img.setAttribute('position', `0 ${y} 0`);
       browserContent.appendChild(img);
       y -= 1.2;
     }
@@ -128,13 +142,13 @@ function renderContent(items) {
 function showError(msg) {
   const t = document.createElement('a-text');
   t.setAttribute('value', msg);
-  t.setAttribute('color','red');
-  t.setAttribute('position','-1 0 0');
+  t.setAttribute('color', 'red');
+  t.setAttribute('position', '-1 0 0');
   browserContent.appendChild(t);
 }
 
 // -----------------------------
-// VR KEYBOARD
+// VR KEYBOARD (BROWSER)
 // -----------------------------
 function buildKeyboard() {
   keyboard.innerHTML = '';
@@ -154,16 +168,16 @@ function buildKeyboard() {
 
 function addKey(label, x, y) {
   const key = document.createElement('a-plane');
-  key.setAttribute('width','0.22');
-  key.setAttribute('height','0.22');
-  key.setAttribute('color','#444');
-  key.setAttribute('position',`${x} ${y} 0`);
-  key.setAttribute('class','clickable');
+  key.setAttribute('width', '0.22');
+  key.setAttribute('height', '0.22');
+  key.setAttribute('color', '#444');
+  key.setAttribute('position', `${x} ${y} 0`);
+  key.setAttribute('class', 'clickable');
 
   const txt = document.createElement('a-text');
   txt.setAttribute('value', label);
-  txt.setAttribute('align','center');
-  txt.setAttribute('position','-0.07 0 0.01');
+  txt.setAttribute('align', 'center');
+  txt.setAttribute('position', '-0.07 0 0.01');
 
   key.appendChild(txt);
   keyboard.appendChild(key);
@@ -177,11 +191,70 @@ function addKey(label, x, y) {
 function pressKey(label) {
   let current = addressText.getAttribute('value');
 
-  if (label === 'BACK') current = current.slice(0,-1);
-  else if (label === 'ENTER') loadPage(current);
-  else current += label.toLowerCase();
+  if (label === 'BACK') {
+    current = current.slice(0, -1);
+  } else if (label === 'ENTER') {
+    loadPage(current);
+  } else {
+    current += label.toLowerCase();
+  }
 
   addressText.setAttribute('value', current);
+}
+
+// -----------------------------
+// NOTES KEYBOARD
+// -----------------------------
+function buildNotesKeyboard() {
+  notesKeyboard.innerHTML = '';
+
+  const keys = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./';
+  let x = -1, y = 0.4;
+
+  keys.split('').forEach(char => {
+    addNotesKey(char, x, y);
+    x += 0.25;
+    if (x > 1) { x = -1; y -= 0.25; }
+  });
+
+  addNotesKey('BACK', -0.5, -0.2);
+  addNotesKey('ENTER', 0.5, -0.2);
+}
+
+function addNotesKey(label, x, y) {
+  const key = document.createElement('a-plane');
+  key.setAttribute('width', '0.22');
+  key.setAttribute('height', '0.22');
+  key.setAttribute('color', '#444');
+  key.setAttribute('position', `${x} ${y} 0`);
+  key.setAttribute('class', 'clickable');
+
+  const txt = document.createElement('a-text');
+  txt.setAttribute('value', label);
+  txt.setAttribute('align', 'center');
+  txt.setAttribute('position', '-0.07 0 0.01');
+
+  key.appendChild(txt);
+  notesKeyboard.appendChild(key);
+
+  key.addEventListener('click', () => {
+    pressNotesKey(label);
+    pulseCursor();
+  });
+}
+
+function pressNotesKey(label) {
+  let current = notesText.getAttribute('value');
+
+  if (label === 'BACK') {
+    current = current.slice(0, -1);
+  } else if (label === 'ENTER') {
+    current += "\n";
+  } else {
+    current += label.toLowerCase();
+  }
+
+  notesText.setAttribute('value', current);
 }
 
 // -----------------------------
@@ -191,10 +264,12 @@ openClock.addEventListener('click', () => {
   clockApp.setAttribute('visible', true);
   pulseCursor();
 });
+
 clockClose.addEventListener('click', () => {
   clockApp.setAttribute('visible', false);
   pulseCursor();
 });
+
 setInterval(() => {
   clockText.setAttribute('value', new Date().toTimeString().split(' ')[0]);
 }, 500);
@@ -204,29 +279,68 @@ setInterval(() => {
 // -----------------------------
 openNotes.addEventListener('click', () => {
   notesApp.setAttribute('visible', true);
+  buildNotesKeyboard();
   pulseCursor();
 });
+
 notesClose.addEventListener('click', () => {
   notesApp.setAttribute('visible', false);
   pulseCursor();
 });
+
 notesAdd.addEventListener('click', () => {
   notesText.setAttribute('value', notesText.getAttribute('value') + "\n- Nieuwe notitie");
   pulseCursor();
 });
 
 // -----------------------------
-// GAZE CLICK (WERKT 100%)
+// SETTINGS APP
+// -----------------------------
+openSettings.addEventListener('click', () => {
+  settingsApp.setAttribute('visible', true);
+  pulseCursor();
+});
+
+settingsClose.addEventListener('click', () => {
+  settingsApp.setAttribute('visible', false);
+  pulseCursor();
+});
+
+// Cursor grootte
+cursorSmall.addEventListener('click', () => {
+  handCursor.setAttribute('radius', 0.02);
+  pulseCursor();
+});
+
+cursorLarge.addEventListener('click', () => {
+  handCursor.setAttribute('radius', 0.06);
+  pulseCursor();
+});
+
+// Gaze snelheid
+let gazeTime = 1000;
+
+gazeFast.addEventListener('click', () => {
+  gazeTime = 500;
+  pulseCursor();
+});
+
+gazeSlow.addEventListener('click', () => {
+  gazeTime = 1500;
+  pulseCursor();
+});
+
+// -----------------------------
+// GAZE CLICK
 // -----------------------------
 let gazeTarget = null;
 let gazeStart = 0;
-const gazeTime = 1000;
 
 function updateGaze() {
   const origin = new THREE.Vector3();
   handCursor.object3D.getWorldPosition(origin);
 
-  const direction = new THREE.Vector3(0,0,-1);
+  const direction = new THREE.Vector3(0, 0, -1);
   handCursor.object3D.getWorldDirection(direction);
 
   const raycaster = new THREE.Raycaster(origin, direction.normalize());
