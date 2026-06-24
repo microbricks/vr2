@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS VR (Touch + Joy-Con)</title>
+  <title>SpaceOS VR (Motion Controls)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <style>
@@ -13,7 +13,7 @@
 
 <a-scene vr-mode-ui="enabled: true">
 
-  <!-- Camera met raycaster voor touch/click -->
+  <!-- Camera + raycaster voor touch -->
   <a-entity id="cameraRig"
             camera
             look-controls
@@ -21,7 +21,7 @@
     <a-cursor fuse="false"></a-cursor>
   </a-entity>
 
-  <!-- Hand cursor (Joy-Con pointer) -->
+  <!-- Motion-controlled cursor -->
   <a-sphere id="handCursor"
             radius="0.03"
             color="#FFD700"
@@ -35,12 +35,6 @@
               color="#7ED321"
               position="-0.4 0 0"
               class="clickable"></a-circle>
-
-    <a-circle id="connectJoyCon"
-              radius="0.15"
-              color="#4A90E2"
-              position="0.4 0 0"
-              class="clickable"></a-circle>
   </a-entity>
 
   <!-- Browser -->
@@ -48,6 +42,7 @@
            position="0 1.5 -3"
            width="2.4" height="2"
            color="#333">
+
     <a-text value="VR Browser" position="-1.1 0.9 0.01"></a-text>
 
     <a-plane id="addressBar"
