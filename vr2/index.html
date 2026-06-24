@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS VR (Apps + Keyboard + Gaze)</title>
+  <title>SpaceOS VR (Apps + Keyboard + Settings)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
@@ -27,82 +27,121 @@
 
   <!-- Dock -->
   <a-entity id="dock" position="0 0.5 -3">
-  <a-circle id="openBrowser" radius="0.18" color="#7ED321" position="-0.9 0 0" class="clickable"></a-circle>
-  <a-circle id="openClock"   radius="0.18" color="#4A90E2" position="-0.3 0 0" class="clickable"></a-circle>
-  <a-circle id="openNotes"   radius="0.18" color="#F5A623" position="0.3 0 0" class="clickable"></a-circle>
-  <a-circle id="openSettings" radius="0.18" color="#9B9B9B" position="0.9 0 0" class="clickable"></a-circle>
-</a-entity>
+    <a-circle id="openBrowser"  radius="0.18" color="#7ED321" position="-0.9 0 0" class="clickable"></a-circle>
+    <a-circle id="openClock"    radius="0.18" color="#4A90E2" position="-0.3 0 0" class="clickable"></a-circle>
+    <a-circle id="openNotes"    radius="0.18" color="#F5A623" position="0.3 0 0"  class="clickable"></a-circle>
+    <a-circle id="openSettings" radius="0.18" color="#9B9B9B" position="0.9 0 0"  class="clickable"></a-circle>
+  </a-entity>
 
-  <!-- Browser -->
-  <a-plane id="browserApp" visible="false" position="0 1.5 -3" width="2.4" height="2" color="#333">
+  <!-- Browser App -->
+  <a-plane id="browserApp" visible="false"
+           position="0 1.5 -3"
+           width="2.4" height="2"
+           color="#333">
+
     <a-text value="VR Browser" position="-1.1 0.9 0.01"></a-text>
 
-    <a-plane id="addressBar" width="2" height="0.25" color="#555" position="0 0.6 0.01">
-      <a-text id="addressText" value="https://example.com" position="-0.95 0 0.01" wrap-count="60"></a-text>
+    <a-plane id="addressBar"
+             width="2"
+             height="0.25"
+             color="#555"
+             position="0 0.6 0.01">
+      <a-text id="addressText"
+              value="https://example.com"
+              position="-0.95 0 0.01"
+              wrap-count="60"></a-text>
     </a-plane>
 
     <a-entity id="browserContent" position="0 -0.1 0.01"></a-entity>
 
-    <a-plane id="browserClose" position="1.1 0.9 0.01" width="0.2" height="0.2" color="red" class="clickable">
+    <a-plane id="browserClose"
+             position="1.1 0.9 0.01"
+             width="0.2" height="0.2"
+             color="red"
+             class="clickable">
       <a-text value="X" align="center" position="0 0 0.01"></a-text>
     </a-plane>
 
-    <!-- VR Keyboard -->
+    <!-- Browser keyboard -->
     <a-entity id="keyboard" position="0 -0.9 0.02"></a-entity>
   </a-plane>
 
-  <!-- Clock -->
-  <a-plane id="clockApp" visible="false" position="-1.5 1.5 -3" width="1.4" height="0.9" color="#222">
+  <!-- Clock App -->
+  <a-plane id="clockApp" visible="false"
+           position="-1.5 1.5 -3"
+           width="1.4" height="0.9"
+           color="#222">
     <a-text value="Klok" position="-0.6 0.3 0.01"></a-text>
     <a-text id="clockText" value="00:00:00" position="-0.6 0 0.01"></a-text>
-    <a-plane id="clockClose" position="0.6 0.3 0.01" width="0.2" height="0.2" color="red" class="clickable">
+    <a-plane id="clockClose"
+             position="0.6 0.3 0.01"
+             width="0.2" height="0.2"
+             color="red"
+             class="clickable">
       <a-text value="X" align="center" position="0 0 0.01"></a-text>
     </a-plane>
   </a-plane>
 
-  <!-- Notes -->
-  <a-plane id="notesApp" visible="false" position="1.5 1.5 -3" width="1.8" height="1.1" color="#222">
+  <!-- Notes App -->
+  <a-plane id="notesApp" visible="false"
+           position="1.5 1.5 -3"
+           width="1.8" height="1.1"
+           color="#222">
     <a-text value="Notities" position="-0.8 0.4 0.01"></a-text>
-    <a-text id="notesText" value="- Eerste notitie" position="-0.8 0.1 0.01" wrap-count="32"></a-text>
 
-    <a-plane id="notesAdd" position="-0.4 -0.3 0.01" width="0.5" height="0.25" color="#4A90E2" class="clickable">
+    <a-text id="notesText"
+            value="- Eerste notitie"
+            position="-0.8 0.1 0.01"
+            wrap-count="32"></a-text>
+
+    <a-plane id="notesAdd"
+             position="-0.4 -0.3 0.01"
+             width="0.5" height="0.25"
+             color="#4A90E2"
+             class="clickable">
       <a-text value="+ Notitie" align="center" position="0 0 0.01"></a-text>
-      <a-entity id="notesKeyboard" position="0 -0.6 0.02"></a-entity>
     </a-plane>
 
-    <a-plane id="notesClose" position="0.8 0.4 0.01" width="0.2" height="0.2" color="red" class="clickable">
+    <a-plane id="notesClose"
+             position="0.8 0.4 0.01"
+             width="0.2" height="0.2"
+             color="red"
+             class="clickable">
+      <a-text value="X" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
+
+    <!-- Notes keyboard -->
+    <a-entity id="notesKeyboard" position="0 -0.6 0.02"></a-entity>
+  </a-plane>
+
+  <!-- Settings App -->
+  <a-plane id="settingsApp" visible="false"
+           position="0 1.5 -3"
+           width="1.8" height="1.2"
+           color="#222">
+
+    <a-text value="Instellingen" position="-0.7 0.45 0.01"></a-text>
+
+    <a-text value="Cursor grootte:" position="-0.7 0.2 0.01"></a-text>
+    <a-plane id="cursorSmall" width="0.4" height="0.2" color="#555" position="-0.3 0.05 0.01" class="clickable">
+      <a-text value="Klein" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
+    <a-plane id="cursorLarge" width="0.4" height="0.2" color="#555" position="0.3 0.05 0.01" class="clickable">
+      <a-text value="Groot" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
+
+    <a-text value="Gaze tijd:" position="-0.7 -0.15 0.01"></a-text>
+    <a-plane id="gazeFast" width="0.4" height="0.2" color="#555" position="-0.3 -0.3 0.01" class="clickable">
+      <a-text value="Snel" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
+    <a-plane id="gazeSlow" width="0.4" height="0.2" color="#555" position="0.3 -0.3 0.01" class="clickable">
+      <a-text value="Langzaam" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
+
+    <a-plane id="settingsClose" width="0.2" height="0.2" color="red" position="0.75 0.45 0.01" class="clickable">
       <a-text value="X" align="center" position="0 0 0.01"></a-text>
     </a-plane>
   </a-plane>
-
-<!-- Settings App -->
-<a-plane id="settingsApp" visible="false"
-         position="0 1.5 -3"
-         width="1.8" height="1.2"
-         color="#222">
-
-  <a-text value="Instellingen" position="-0.7 0.45 0.01"></a-text>
-
-  <a-text value="Cursor grootte:" position="-0.7 0.2 0.01"></a-text>
-  <a-plane id="cursorSmall" width="0.4" height="0.2" color="#555" position="-0.3 0.05 0.01" class="clickable">
-    <a-text value="Klein" align="center" position="0 0 0.01"></a-text>
-  </a-plane>
-  <a-plane id="cursorLarge" width="0.4" height="0.2" color="#555" position="0.3 0.05 0.01" class="clickable">
-    <a-text value="Groot" align="center" position="0 0 0.01"></a-text>
-  </a-plane>
-
-  <a-text value="Gaze tijd:" position="-0.7 -0.15 0.01"></a-text>
-  <a-plane id="gazeFast" width="0.4" height="0.2" color="#555" position="-0.3 -0.3 0.01" class="clickable">
-    <a-text value="Snel" align="center" position="0 0 0.01"></a-text>
-  </a-plane>
-  <a-plane id="gazeSlow" width="0.4" height="0.2" color="#555" position="0.3 -0.3 0.01" class="clickable">
-    <a-text value="Langzaam" align="center" position="0 0 0.01"></a-text>
-  </a-plane>
-
-  <a-plane id="settingsClose" width="0.2" height="0.2" color="red" position="0.75 0.45 0.01" class="clickable">
-    <a-text value="X" align="center" position="0 0 0.01"></a-text>
-  </a-plane>
-</a-plane>
 
   <a-sky color="#111"></a-sky>
 </a-scene>
