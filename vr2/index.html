@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS VR (Gaze Controls)</title>
+  <title>SpaceOS VR (Apps + Gaze)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
@@ -25,22 +25,28 @@
             position="0 0 -2.5">
   </a-sphere>
 
-  <!-- Dock -->
+  <!-- Dock met 3 apps -->
   <a-entity id="dock" position="0 0.5 -3">
     <a-circle id="openBrowser"
               radius="0.18"
               color="#7ED321"
-              position="-0.4 0 0"
+              position="-0.6 0 0"
               class="clickable"></a-circle>
 
-    <a-circle id="dummyButton"
+    <a-circle id="openClock"
               radius="0.18"
               color="#4A90E2"
-              position="0.4 0 0"
+              position="0 0 0"
+              class="clickable"></a-circle>
+
+    <a-circle id="openNotes"
+              radius="0.18"
+              color="#F5A623"
+              position="0.6 0 0"
               class="clickable"></a-circle>
   </a-entity>
 
-  <!-- Browser -->
+  <!-- Browser app -->
   <a-plane id="browserApp" visible="false"
            position="0 1.5 -3"
            width="2.4" height="2"
@@ -70,6 +76,56 @@
     </a-plane>
 
     <a-entity id="keyboard" position="0 -0.9 0.02"></a-entity>
+  </a-plane>
+
+  <!-- Clock app -->
+  <a-plane id="clockApp" visible="false"
+           position="-1.5 1.5 -3"
+           width="1.4" height="0.9"
+           color="#222">
+    <a-text value="Klok" position="-0.6 0.3 0.01"></a-text>
+
+    <a-text id="clockText"
+            value="00:00:00"
+            position="-0.6 0 0.01"
+            wrap-count="20"></a-text>
+
+    <a-plane id="clockClose"
+             position="0.6 0.3 0.01"
+             width="0.2" height="0.2"
+             color="red"
+             class="clickable">
+      <a-text value="X" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
+  </a-plane>
+
+  <!-- Notes app -->
+  <a-plane id="notesApp" visible="false"
+           position="1.5 1.5 -3"
+           width="1.8" height="1.1"
+           color="#222">
+    <a-text value="Notities" position="-0.8 0.4 0.01"></a-text>
+
+    <a-text id="notesText"
+            value="- Eerste notitie"
+            position="-0.8 0.1 0.01"
+            wrap-count="32"></a-text>
+
+    <a-plane id="notesAdd"
+             position="-0.4 -0.3 0.01"
+             width="0.5" height="0.25"
+             color="#4A90E2"
+             class="clickable">
+      <a-text value="+ Notitie" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
+
+    <a-plane id="notesClose"
+             position="0.8 0.4 0.01"
+             width="0.2" height="0.2"
+             color="red"
+             class="clickable">
+      <a-text value="X" align="center" position="0 0 0.01"></a-text>
+    </a-plane>
   </a-plane>
 
   <a-sky color="#111"></a-sky>
