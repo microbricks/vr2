@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Gorilla Tag VR (No Hand Tracking)</title>
+  <title>Gorilla Tag VR (met iPad Controller)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 </head>
@@ -14,10 +14,6 @@
   <a-entity id="cameraRig" position="0 1.6 0">
     <a-entity camera look-controls></a-entity>
   </a-entity>
-
-  <!-- Fake hands (controller or mouse driven) -->
-  <a-sphere id="leftHand"  radius="0.12" color="#FF5733" position="-0.3 1.4 -1"></a-sphere>
-  <a-sphere id="rightHand" radius="0.12" color="#FF5733" position="0.3 1.4 -1"></a-sphere>
 
   <!-- Gorilla Tag wereld -->
   <a-entity id="gorillaWorld">
@@ -49,11 +45,12 @@
     <a-plane color="#000"
              width="3" height="1.2"
              position="0 2 -3">
-      <a-text value="Gorilla Tag demo
-Besturing:
-- Beweeg handen omlaag = vooruit
-- Klik = jump
-- Handen tegen boom = klimmen"
+      <a-text value="Gorilla Tag VR
+Besturing via iPad Controller:
+- forward
+- jump
+- climb
+- tag"
               align="center"
               wrap-count="30"
               position="-1.3 0.3 0.01"></a-text>
@@ -64,6 +61,6 @@ Besturing:
   <a-sky color="#87CEEB"></a-sky>
 </a-scene>
 
-<script src="script.js"></script>
+<script src="vr.js"></script>
 </body>
 </html>
