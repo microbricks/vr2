@@ -3,59 +3,55 @@ const cameraBtn = document.getElementById("cameraBtn");
 const sceneEl = document.getElementById("scene");
 const melding = document.getElementById("melding");
 
-// SpaceOS melding functie
-function showMelding(text) {
-  melding.textContent = text;
+// Log helper
+function log(msg) {
+  console.log(msg);
+  melding.textContent = msg;
   melding.style.display = "block";
-
-  setTimeout(() => {
-    melding.style.display = "none";
-  }, 3000);
 }
 
-// Renderer transparant maken
+// Renderer transparant
 sceneEl.addEventListener("loaded", () => {
   const renderer = sceneEl.renderer;
   if (renderer) {
     renderer.setClearColor(0x000000, 0);
+    log("Renderer transparant ✔");
   }
 });
 
 // Toestemming checken
 async function vraagCameraToestemming() {
   if (!navigator.permissions) {
-    showMelding("Kan permissies niet controleren, proberen...");
+    log("Permissions API niet beschikbaar → doorgaan");
     return true;
   }
 
   try {
     const status = await navigator.permissions.query({ name: "camera" });
+    log("Permissie status: " + status.state);
 
-    if (status.state === "granted") {
-      showMelding("✔ Camera toegestaan");
-      return true;
-    }
-
-    if (status.state === "prompt") {
-      showMelding("ℹ Toestemming wordt gevraagd...");
-      return true;
-    }
+    if (status.state === "granted") return true;
+    if (status.state === "prompt") return true;
 
     if (status.state === "denied") {
-      showMelding("❌ Camera geblokkeerd in instellingen");
+      log("Camera geblokkeerd in instellingen ❌");
       return false;
     }
 
   } catch (err) {
-    showMelding("⚠ Kan permissie niet controleren");
+    log("Permissie check fout: " + err.message);
     return true;
   }
 }
 
 // Camera starten
 cameraBtn.addEventListener("click", async () => {
+  log("Knop ingedrukt → toestemming checken...");
+
   const toestemming = await vraagCameraToestemming();
   if (!toestemming) return;
+
+  log("Toestemming OK → camera openen...");
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
@@ -63,12 +59,19 @@ cameraBtn.addEventListener("click", async () => {
       audio: false
     });
 
+    if (!stream) {
+      log("Stream = null ❌");
+      return;
+    }
+
+    log("Stream ontvangen ✔");
+
     camVideo.srcObject = stream;
     camVideo.style.display = "block";
 
-    showMelding("🎥 Camera achtergrond actief");
+    log("Camera actief 🎥");
 
   } catch (err) {
-    showMelding("❌ Camera fout: " + err.message);
+    log("getUserMedia fout: " + err.name + " → " + err.message);
   }
 });
