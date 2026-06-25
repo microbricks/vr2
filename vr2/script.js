@@ -1,5 +1,5 @@
 // ===============================
-// UI / WINDOW MANAGER
+// WINDOW MANAGER
 // ===============================
 const windows = {
   browser: document.querySelector("#win-browser"),
@@ -31,7 +31,7 @@ document.querySelectorAll(".window-close").forEach(btn => {
 });
 
 // ===============================
-// CAMERA AR BACKGROUND
+// AR CAMERA BACKGROUND
 // ===============================
 const cameraBtn = document.querySelector("#cameraBgBtn");
 const bgVideo = document.querySelector("#bgVideo");
@@ -55,7 +55,6 @@ cameraBtn.addEventListener("click", async () => {
       arActive = true;
       arStatus.textContent = "Aan";
       cameraBtn.textContent = "AR Background uit";
-      console.log("AR background actief");
     } catch (err) {
       console.error("Camera fout:", err);
     }
@@ -65,14 +64,14 @@ cameraBtn.addEventListener("click", async () => {
       camStream = null;
     }
     bgVideo.style.display = "none";
+
     const scene = document.querySelector("a-scene");
-    scene.renderer.setClearColor(0x05060a, 1);
+    scene.renderer.setClearColor(0x000010, 1);
     document.querySelector("#sky").setAttribute("visible", "true");
 
     arActive = false;
     arStatus.textContent = "Uit";
     cameraBtn.textContent = "AR Background";
-    console.log("AR background uit");
   }
 });
 
@@ -81,7 +80,6 @@ cameraBtn.addEventListener("click", async () => {
 // ===============================
 const rig = document.querySelector("#cameraRig");
 
-// Joy-Con detectie
 let leftJoycon = null;
 let rightJoycon = null;
 const joyconStatus = document.querySelector("#joyconStatus");
@@ -98,12 +96,10 @@ window.addEventListener("gamepadconnected", () => {
   }
 });
 
-// Keyboard
 const keys = {};
 window.addEventListener("keydown", e => keys[e.key] = true);
 window.addEventListener("keyup", e => keys[e.key] = false);
 
-// Movement vars
 let velocityY = 0;
 let grounded = true;
 const gravity = -0.01;
@@ -116,7 +112,6 @@ const climbForce = 0.10;
 let prevLeftY = 0;
 let prevRightY = 0;
 
-// Movement helpers
 function moveForward(speed) {
   const dir = new THREE.Vector3(0, 0, -1);
   rig.object3D.getWorldDirection(dir);
@@ -145,11 +140,9 @@ function moveRight(speed) {
   rig.object3D.position.addScaledVector(dir, speed);
 }
 
-// Main locomotion loop
 function locomotionLoop() {
   const pads = navigator.getGamepads();
 
-  // Joy-Con arm swing
   if (leftJoycon !== null) {
     const gp = pads[leftJoycon];
     if (gp) {
@@ -168,16 +161,13 @@ function locomotionLoop() {
       if (swing > 0.25) moveForward(armSwingForce);
       prevRightY = ry;
 
-      // Jump (A)
       if (gp.buttons[0].pressed && grounded) {
         velocityY = jumpForce;
         grounded = false;
       }
-      // Climb (X)
       if (gp.buttons[2].pressed) {
         rig.object3D.position.y += climbForce;
       }
-      // Tag (B)
       if (gp.buttons[1].pressed) {
         rig.object3D.position.y += 0.1;
         setTimeout(() => rig.object3D.position.y -= 0.1, 150);
@@ -185,7 +175,6 @@ function locomotionLoop() {
     }
   }
 
-  // Keyboard locomotion
   if (keys["w"]) moveForward(keyboardForce);
   if (keys["s"]) moveBackward(keyboardForce);
   if (keys["a"]) moveLeft(keyboardForce);
@@ -199,7 +188,6 @@ function locomotionLoop() {
     rig.object3D.position.y += climbForce;
   }
 
-  // Gravity
   if (!grounded) {
     velocityY += gravity;
     rig.object3D.position.y += velocityY;
