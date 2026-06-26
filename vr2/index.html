@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS VR 3D Panels + Gaze Click</title>
+  <title>SpaceOS VR (full rebuild)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -32,12 +32,34 @@
       opacity: 0.8;
       z-index: 20;
     }
+    #gazeCircle {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      margin-left: -20px;
+      margin-top: -20px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3);
+      box-sizing: border-box;
+      z-index: 19;
+      pointer-events: none;
+      transform: rotate(-90deg);
+      display: none;
+      background: conic-gradient(
+        rgba(74,140,255,1) 0deg,
+        rgba(74,140,255,1) 0deg,
+        rgba(255,255,255,0) 0deg
+      );
+    }
   </style>
 </head>
 <body>
 
 <video id="bgVideo" autoplay playsinline></video>
 <div id="centerDot"></div>
+<div id="gazeCircle"></div>
 
 <a-scene>
 
@@ -76,7 +98,7 @@
   <a-entity light="type: ambient; intensity: 0.8"></a-entity>
   <a-entity light="type: directional; intensity: 0.6" position="2 4 1"></a-entity>
 
-  <!-- 3D APP TEGELS -->
+  <!-- 3D APP TILES -->
   <a-plane id="tile-browser"
            position="-2 1.4 -4"
            width="1.6" height="0.8"
@@ -113,7 +135,7 @@
            text="value: AR Background; align: center; color: #FFFFFF; width: 3;">
   </a-plane>
 
-  <!-- 3D PANELS (APPS) -->
+  <!-- 3D PANELS -->
   <a-plane id="panel-browser"
            position="0 2 -3"
            width="3.5" height="2"
