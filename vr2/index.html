@@ -2,15 +2,17 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS VR (full)</title>
+  <title>SpaceOS Pro VR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="script.js" defer></script>
 
   <style>
-    body { margin:0; overflow:hidden; }
+    * { box-sizing: border-box; }
+    body { margin:0; overflow:hidden; font-family: system-ui, sans-serif; }
 
+    /* CAMERA ACHTERGROND */
     #bgVideo {
       position: fixed;
       top: 0; left: 0;
@@ -21,170 +23,165 @@
       display: none;
     }
 
-    #centerDot {
+    /* OS UI */
+    #dock {
       position: fixed;
-      top: 50%;
+      bottom: 20px;
       left: 50%;
-      width: 8px;
-      height: 8px;
-      margin-left: -4px;
-      margin-top: -4px;
-      border-radius: 50%;
-      background: white;
-      opacity: 0.8;
-      z-index: 20;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 16px;
+      z-index: 10;
     }
 
-    #gazeCircle {
+    .dock-btn {
+      padding: 10px 18px;
+      background: rgba(10,10,10,0.85);
+      color: #fff;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    /* WINDOWS */
+    .window {
       position: fixed;
-      top: 50%;
+      top: 10%;
       left: 50%;
-      width: 40px;
-      height: 40px;
-      margin-left: -20px;
-      margin-top: -20px;
-      border-radius: 50%;
-      border: 3px solid rgba(255,255,255,0.3);
-      box-sizing: border-box;
-      z-index: 19;
-      pointer-events: none;
-      transform: rotate(-90deg);
+      transform: translateX(-50%);
+      width: 60vw;
+      max-width: 800px;
+      height: 60vh;
+      background: rgba(15,15,20,0.92);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
       display: none;
-      background: conic-gradient(
-        rgba(74,140,255,1) 0deg,
-        rgba(74,140,255,1) 0deg,
-        rgba(255,255,255,0) 0deg
-      );
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 9;
+      backdrop-filter: blur(12px);
+    }
+
+    .window-header {
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+    }
+
+    .window-title {
+      opacity: 0.9;
+    }
+
+    .window-close {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: none;
+      background: #ff5f57;
+      cursor: pointer;
+    }
+
+    .window-body {
+      padding: 10px;
+      height: 100%;
+      overflow: auto;
+      font-size: 14px;
+    }
+
+    #notesArea {
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 8px;
+      border-radius: 8px;
+      resize: none;
+    }
+
+    #browserFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+      background: #111;
+    }
+
+    #settingsBody label {
+      display: block;
+      margin-bottom: 8px;
     }
   </style>
 </head>
 <body>
 
+<!-- CAMERA ACHTERGROND -->
 <video id="bgVideo" autoplay playsinline></video>
-<div id="centerDot"></div>
-<div id="gazeCircle"></div>
 
+<!-- DOCK / HOMESCREEN -->
+<div id="dock">
+  <button class="dock-btn" data-app="browser">Browser</button>
+  <button class="dock-btn" data-app="notes">Notities</button>
+  <button class="dock-btn" data-app="settings">Instellingen</button>
+  <button class="dock-btn" id="cameraBgBtn">AR Background</button>
+</div>
+
+<!-- WINDOWS -->
+<div class="window" id="win-browser">
+  <div class="window-header">
+    <span class="window-title">VR Browser</span>
+    <button class="window-close" data-close="browser"></button>
+  </div>
+  <div class="window-body">
+    <iframe id="browserFrame" src="https://example.com"></iframe>
+  </div>
+</div>
+
+<div class="window" id="win-notes">
+  <div class="window-header">
+    <span class="window-title">Notities</span>
+    <button class="window-close" data-close="notes"></button>
+  </div>
+  <div class="window-body">
+    <textarea id="notesArea" placeholder="Schrijf hier je VR-notities..."></textarea>
+  </div>
+</div>
+
+<div class="window" id="win-settings">
+  <div class="window-header">
+    <span class="window-title">SpaceOS Instellingen</span>
+    <button class="window-close" data-close="settings"></button>
+  </div>
+  <div class="window-body" id="settingsBody">
+    <label>
+      Joy-Con locomotion:
+      <span id="joyconStatus">Niet gedetecteerd</span>
+    </label>
+    <label>
+      Keyboard locomotion:
+      <span id="keyboardStatus">Actief (WASD)</span>
+    </label>
+    <label>
+      AR Background:
+      <span id="arStatus">Uit</span>
+    </label>
+  </div>
+</div>
+
+<!-- VR SCENE -->
 <a-scene>
-
-  <!-- CAMERA RIG -->
   <a-entity id="cameraRig" position="0 1.6 0">
     <a-entity camera look-controls></a-entity>
   </a-entity>
 
-  <!-- META-HOME OMGEVING -->
-  <a-sky id="sky" color="#1a1f2b"></a-sky>
-
-  <a-cylinder 
-    position="0 0 0" 
-    radius="6" 
-    height="0.2" 
-    color="#2a2f3b"
-    material="metalness:0.4; roughness:0.2;">
-  </a-cylinder>
-
-  <a-plane 
-    position="0 2 -6" 
-    width="12" 
-    height="6" 
-    color="#20242f"
-    material="opacity:0.9; metalness:0.3; roughness:0.4;">
-  </a-plane>
-
-  <a-ring 
-    position="0 2 -5.9"
-    radius-inner="5.5"
-    radius-outer="5.7"
-    color="#4a8cff"
-    material="emissive:#4a8cff; emissiveIntensity:0.6;">
-  </a-ring>
-
-  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-  <a-entity light="type: directional; intensity: 0.6" position="2 4 1"></a-entity>
-
-  <!-- 3D APP TILES -->
-  <a-plane id="tile-browser"
-           position="-2 1.4 -4"
-           width="1.6" height="0.8"
-           color="#303545"
-           material="shader: standard; metalness:0.3; roughness:0.4"
-           class="clickable"
-           text="value: Browser; align: center; color: #FFFFFF; width: 3;">
-  </a-plane>
-
-  <a-plane id="tile-notes"
-           position="0 1.4 -4"
-           width="1.6" height="0.8"
-           color="#303545"
-           material="shader: standard; metalness:0.3; roughness:0.4"
-           class="clickable"
-           text="value: Notities; align: center; color: #FFFFFF; width: 3;">
-  </a-plane>
-
-  <a-plane id="tile-settings"
-           position="2 1.4 -4"
-           width="1.6" height="0.8"
-           color="#303545"
-           material="shader: standard; metalness:0.3; roughness:0.4"
-           class="clickable"
-           text="value: Instellingen; align: center; color: #FFFFFF; width: 3;">
-  </a-plane>
-
-  <a-plane id="tile-ar"
-           position="0 0.4 -4"
-           width="1.6" height="0.6"
-           color="#264b7b"
-           material="shader: standard; metalness:0.4; roughness:0.3"
-           class="clickable"
-           text="value: AR Background; align: center; color: #FFFFFF; width: 3;">
-  </a-plane>
-
-  <!-- 3D PANELS -->
-  <a-plane id="panel-browser"
-           position="0 2 -3"
-           width="3.5" height="2"
-           color="#181a22"
-           visible="false"
-           material="shader: standard; metalness:0.2; roughness:0.5">
-  </a-plane>
-
-  <a-plane id="panel-notes"
-           position="0 2 -3"
-           width="3.5" height="2"
-           color="#181a22"
-           visible="false"
-           material="shader: standard; metalness:0.2; roughness:0.5">
-  </a-plane>
-
-  <a-plane id="panel-settings"
-           position="0 2 -3"
-           width="3.5" height="2"
-           color="#181a22"
-           visible="false"
-           material="shader: standard; metalness:0.2; roughness:0.5">
-  </a-plane>
-
-  <!-- PANEL TEXT -->
-  <a-entity id="panel-browser-text"
-            position="0 2 -2.9"
-            text="value: Browser geopend (dummy); align: center; color: #FFFFFF; width: 4;"
-            visible="false"></a-entity>
-
-  <a-entity id="panel-notes-text"
-            position="0 2 -2.9"
-            text="value: Notities: hier komt later echte input; align: center; color: #FFFFFF; width: 4;"
-            visible="false"></a-entity>
-
-  <a-entity id="panel-settings-text"
-            position="0 2 -2.9"
-            text="value: Instellingen: Joy-Con, keyboard, AR status; align: center; color: #FFFFFF; width: 4;"
-            visible="false"></a-entity>
-
-  <!-- JOY-CON POINTER RAY -->
-  <a-entity id="joyconRay"
-            line="start: 0 0 0; end: 0 0 -3; color: #4a8cff"
-            visible="false">
-  </a-entity>
-
+  <a-sky id="sky" color="#05060a"></a-sky>
+  <a-plane color="#20252b" width="40" height="40" rotation="-90 0 0"></a-plane>
 </a-scene>
 
 </body>
