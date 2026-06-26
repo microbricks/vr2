@@ -1,5 +1,5 @@
 // ===============================
-// 3D PANEL MANAGER
+// PANELS
 // ===============================
 const panels = {
   browser: document.querySelector("#panel-browser"),
@@ -22,7 +22,7 @@ function showPanel(name) {
 }
 
 // ===============================
-// TILE CLICKS
+// TILES
 // ===============================
 const tileBrowser = document.querySelector("#tile-browser");
 const tileNotes = document.querySelector("#tile-notes");
@@ -77,7 +77,7 @@ tileAR.addEventListener("click", async () => {
 });
 
 // ===============================
-// JOY-CON + KEYBOARD LOCOMOTION
+// LOCOMOTION (KEYBOARD + JOY-CON)
 // ===============================
 const rig = document.querySelector("#cameraRig");
 
@@ -88,8 +88,16 @@ window.addEventListener("gamepadconnected", () => {
   const pads = navigator.getGamepads();
   for (const gp of pads) {
     if (!gp) continue;
-    if (gp.id.includes("Joy-Con (L)")) leftJoycon = gp.index;
-    if (gp.id.includes("Joy-Con (R)")) rightJoycon = gp.index;
+
+    if (gp.id.includes("Joy-Con (L)")) {
+      leftJoycon = gp.index;
+      console.log("Left Joy-Con connected:", gp.index);
+    }
+
+    if (gp.id.includes("Joy-Con (R)")) {
+      rightJoycon = gp.index;
+      console.log("Right Joy-Con connected:", gp.index);
+    }
   }
 });
 
@@ -137,57 +145,83 @@ function moveRight(speed) {
   rig.object3D.position.addScaledVector(dir, speed);
 }
 
-function locomotionLoop() {
-  const pads = navigator.getGamepads();
-
+function joyconMovement(pads) {
+  // LEFT JOY-CON (arm swing)
   if (leftJoycon !== null) {
     const gp = pads[leftJoycon];
     if (gp) {
       const ly = gp.axes[1];
       const swing = prevLeftY - ly;
+
       if (swing > 0.25) moveForward(armSwingForce);
+
       prevLeftY = ly;
     }
   }
 
+  // RIGHT JOY-CON (arm swing + buttons + ray)
   if (rightJoycon !== null) {
     const gp = pads[rightJoycon];
     if (gp) {
       const ry = gp.axes[1];
       const swing = prevRightY - ry;
+
       if (swing > 0.25) moveForward(armSwingForce);
+
       prevRightY = ry;
 
+      // A = Jump
       if (gp.buttons[0].pressed && grounded) {
         velocityY = jumpForce;
         grounded = false;
       }
-      if (gp.buttons[2].pressed) {
-        rig.object3D.position.y += climbForce;
-      }
+
+      // B = Tag + ray-click
       if (gp.buttons[1].pressed) {
         rig.object3D.position.y += 0.1;
         setTimeout(() => rig.object3D.position.y -= 0.1, 150);
+        joyconRayClick();
       }
+
+      // X = Climb
+      if (gp.buttons[2].pressed) {
+        rig.object3D.position.y += climbForce;
+      }
+
+      // update pointer ray
+      updateJoyconRay();
     }
   }
+}
 
+function locomotionLoop() {
+  const pads = navigator.getGamepads();
+
+  // Joy-Con locomotion
+  joyconMovement(pads);
+
+  // Keyboard locomotion
   if (keys["w"]) moveForward(keyboardForce);
   if (keys["s"]) moveBackward(keyboardForce);
   if (keys["a"]) moveLeft(keyboardForce);
   if (keys["d"]) moveRight(keyboardForce);
 
+  // Keyboard jump
   if (keys[" "] && grounded) {
     velocityY = jumpForce;
     grounded = false;
   }
+
+  // Keyboard climb
   if (keys["Shift"]) {
     rig.object3D.position.y += climbForce;
   }
 
+  // Gravity
   if (!grounded) {
     velocityY += gravity;
     rig.object3D.position.y += velocityY;
+
     if (rig.object3D.position.y <= 1.6) {
       rig.object3D.position.y = 1.6;
       velocityY = 0;
@@ -201,7 +235,7 @@ function locomotionLoop() {
 locomotionLoop();
 
 // ===============================
-// GAZE TIMER CIRKEL + GAZE CLICK
+// GAZE TIMER + GAZE CLICK
 // ===============================
 const gazeCircle = document.querySelector("#gazeCircle");
 let gazeTarget = null;
@@ -269,3 +303,53 @@ function gazeLoop() {
 }
 
 gazeLoop();
+
+// ===============================
+// JOY-CON POINTER RAY + RAY CLICK
+// ===============================
+const joyconRay = document.querySelector("#joyconRay");
+
+function updateJoyconRay() {
+  if (rightJoycon === null) {
+    joyconRay.setAttribute("visible", "false");
+    return;
+  }
+
+  const cameraEl = document.querySelector("[camera]");
+  if (!cameraEl) return;
+
+  const camObj = cameraEl.object3D;
+  const rayObj = joyconRay.object3D;
+
+  rayObj.position.copy(camObj.position);
+
+  joyconRay.setAttribute("line", {
+    start: "0 0 0",
+    end: "0 0 -3",
+    color: "#4a8cff"
+  });
+
+  joyconRay.setAttribute("visible", "true");
+}
+
+function joyconRayClick() {
+  const cameraEl = document.querySelector("[camera]");
+  if (!cameraEl) return;
+
+  const camObj = cameraEl.object3D;
+  const raycaster = new THREE.Raycaster();
+  const dir = new THREE.Vector3(0, 0, -1);
+  camObj.getWorldDirection(dir);
+  raycaster.set(camObj.position, dir);
+
+  const clickableEls = Array.from(document.querySelectorAll(".clickable"));
+  const clickableObjs = clickableEls.map(el => el.object3D);
+
+  const hits = raycaster.intersectObjects(clickableObjs, true);
+
+  if (hits.length > 0) {
+    const hitObj = hits[0].object;
+    const targetEl = hitObj.el;
+    targetEl.emit("click");
+  }
+}
