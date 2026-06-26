@@ -1,45 +1,46 @@
 // ===============================
-// WINDOW MANAGER
+// 3D PANEL MANAGER
 // ===============================
-const windows = {
-  browser: document.querySelector("#win-browser"),
-  notes: document.querySelector("#win-notes"),
-  settings: document.querySelector("#win-settings"),
+const panels = {
+  browser: document.querySelector("#panel-browser"),
+  notes: document.querySelector("#panel-notes"),
+  settings: document.querySelector("#panel-settings"),
 };
 
-function openWindow(name) {
-  Object.values(windows).forEach(w => w.style.display = "none");
-  if (windows[name]) windows[name].style.display = "flex";
+const panelText = {
+  browser: document.querySelector("#panel-browser-text"),
+  notes: document.querySelector("#panel-notes-text"),
+  settings: document.querySelector("#panel-settings-text"),
+};
+
+function showPanel(name) {
+  Object.values(panels).forEach(p => p.setAttribute("visible", "false"));
+  Object.values(panelText).forEach(t => t.setAttribute("visible", "false"));
+
+  if (panels[name]) panels[name].setAttribute("visible", "true");
+  if (panelText[name]) panelText[name].setAttribute("visible", "true");
 }
 
-function closeWindow(name) {
-  if (windows[name]) windows[name].style.display = "none";
-}
+// ===============================
+// TILE CLICKS (APPS)
+// ===============================
+const tileBrowser = document.querySelector("#tile-browser");
+const tileNotes = document.querySelector("#tile-notes");
+const tileSettings = document.querySelector("#tile-settings");
+const tileAR = document.querySelector("#tile-ar");
 
-document.querySelectorAll(".dock-btn[data-app]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const app = btn.getAttribute("data-app");
-    openWindow(app);
-  });
-});
-
-document.querySelectorAll(".window-close").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const app = btn.getAttribute("data-close");
-    closeWindow(app);
-  });
-});
+tileBrowser.addEventListener("click", () => showPanel("browser"));
+tileNotes.addEventListener("click", () => showPanel("notes"));
+tileSettings.addEventListener("click", () => showPanel("settings"));
 
 // ===============================
-// AR CAMERA BACKGROUND
+// AR BACKGROUND
 // ===============================
-const cameraBtn = document.querySelector("#cameraBgBtn");
 const bgVideo = document.querySelector("#bgVideo");
-const arStatus = document.querySelector("#arStatus");
 let arActive = false;
 let camStream = null;
 
-cameraBtn.addEventListener("click", async () => {
+tileAR.addEventListener("click", async () => {
   if (!arActive) {
     try {
       camStream = await navigator.mediaDevices.getUserMedia({
@@ -53,8 +54,8 @@ cameraBtn.addEventListener("click", async () => {
       document.querySelector("#sky").setAttribute("visible", "false");
 
       arActive = true;
-      arStatus.textContent = "Aan";
-      cameraBtn.textContent = "AR Background uit";
+      tileAR.setAttribute("color", "#1f7b4b");
+      tileAR.setAttribute("text", "value: AR Background (aan); align: center; color: #FFFFFF; width: 3;");
     } catch (err) {
       console.error("Camera fout:", err);
     }
@@ -70,8 +71,8 @@ cameraBtn.addEventListener("click", async () => {
     document.querySelector("#sky").setAttribute("visible", "true");
 
     arActive = false;
-    arStatus.textContent = "Uit";
-    cameraBtn.textContent = "AR Background";
+    tileAR.setAttribute("color", "#264b7b");
+    tileAR.setAttribute("text", "value: AR Background; align: center; color: #FFFFFF; width: 3;");
   }
 });
 
@@ -82,7 +83,6 @@ const rig = document.querySelector("#cameraRig");
 
 let leftJoycon = null;
 let rightJoycon = null;
-const joyconStatus = document.querySelector("#joyconStatus");
 
 window.addEventListener("gamepadconnected", () => {
   const pads = navigator.getGamepads();
@@ -90,9 +90,6 @@ window.addEventListener("gamepadconnected", () => {
     if (!gp) continue;
     if (gp.id.includes("Joy-Con (L)")) leftJoycon = gp.index;
     if (gp.id.includes("Joy-Con (R)")) rightJoycon = gp.index;
-  }
-  if (leftJoycon !== null || rightJoycon !== null) {
-    joyconStatus.textContent = "Actief";
   }
 });
 
