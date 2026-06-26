@@ -2,11 +2,11 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>SpaceOS Pro VR</title>
+  <title>SpaceOS VR (from scratch)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="script.js" defer></script>
+  <script src="spaceos.js" defer></script>
 
   <style>
     * { box-sizing: border-box; }
@@ -164,10 +164,9 @@
     <a-entity camera look-controls></a-entity>
   </a-entity>
 
-  <!-- META HOME SKY -->
-  <a-sky color="#1a1f2b"></a-sky>
+  <!-- META-HOME OMGEVING -->
+  <a-sky id="sky" color="#1a1f2b"></a-sky>
 
-  <!-- ZWEVEND PLATFORM -->
   <a-cylinder 
     position="0 0 0" 
     radius="6" 
@@ -176,11 +175,6 @@
     material="metalness:0.4; roughness:0.2;">
   </a-cylinder>
 
-  <!-- LICHT -->
-  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
-  <a-entity light="type: directional; intensity: 0.6" position="2 4 1"></a-entity>
-
-  <!-- ACHTERGROND MUUR / META PANEL -->
   <a-plane 
     position="0 2 -6" 
     width="12" 
@@ -189,7 +183,6 @@
     material="opacity:0.9; metalness:0.3; roughness:0.4;">
   </a-plane>
 
-  <!-- DECORATIEVE LICHTRAND -->
   <a-ring 
     position="0 2 -5.9"
     radius-inner="5.5"
@@ -198,8 +191,10 @@
     material="emissive:#4a8cff; emissiveIntensity:0.6;">
   </a-ring>
 
-</a-scene>
+  <a-entity light="type: ambient; intensity: 0.8"></a-entity>
+  <a-entity light="type: directional; intensity: 0.6" position="2 4 1"></a-entity>
 
+</a-scene>
 
 </body>
 </html>
