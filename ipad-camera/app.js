@@ -3,9 +3,7 @@ const canvas = document.getElementById('output');
 const ctx = canvas.getContext('2d');
 const debug = document.getElementById('debug');
 
-// ---------------------------
 // CAMERA
-// ---------------------------
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: 'user' },
@@ -15,9 +13,7 @@ async function startCamera() {
 }
 startCamera();
 
-// ---------------------------
 // MEDIAPIPE HANDS
-// ---------------------------
 const hands = new Hands({
   locateFile: (file) =>
     `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -41,9 +37,7 @@ const camera = new Camera(video, {
 });
 camera.start();
 
-// ---------------------------
-// WEBRTC
-// ---------------------------
+// WEBRTC SENDER
 let pc;
 let dataChannel;
 
@@ -72,9 +66,7 @@ async function applyAnswer() {
   await pc.setRemoteDescription(answer);
 }
 
-// ---------------------------
 // HANDTRACKING CALLBACK
-// ---------------------------
 function onResults(results) {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
@@ -127,15 +119,12 @@ function onResults(results) {
   const payload = buildPayload(results);
   debug.textContent = JSON.stringify(payload, null, 2);
 
-  // SEND VIA WEBRTC
   if (dataChannel && dataChannel.readyState === "open") {
     dataChannel.send(JSON.stringify(payload));
   }
 }
 
-// ---------------------------
 // PAYLOAD
-// ---------------------------
 function buildPayload(results) {
   const handsOut = [];
 
@@ -150,7 +139,6 @@ function buildPayload(results) {
         z: lm.z
       }));
 
-      // pinch gesture
       const thumb = landmarks[4];
       const index = landmarks[8];
       const dx = thumb.x - index.x;
@@ -175,9 +163,7 @@ function buildPayload(results) {
   };
 }
 
-// ---------------------------
 // DOT TEKENEN MET Z‑GROOTTE
-// ---------------------------
 function drawDot(x, y, z, baseSize, color) {
   const scale = 1 - (z * 5);
   const size = baseSize * scale;
