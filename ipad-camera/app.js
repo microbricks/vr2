@@ -3,18 +3,21 @@ const canvas = document.getElementById('output');
 const ctx = canvas.getContext('2d');
 const debug = document.getElementById('debug');
 
-// Camera starten
+// ---------------------------
+// CAMERA
+// ---------------------------
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'user' }, // 'environment' voor achtercamera
+    video: { facingMode: 'user' },
     audio: false
   });
   video.srcObject = stream;
 }
-
 startCamera();
 
-// MediaPipe Hands setup
+// ---------------------------
+// MEDIAPIPE HANDS
+// ---------------------------
 const hands = new Hands({
   locateFile: (file) =>
     `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
@@ -29,7 +32,6 @@ hands.setOptions({
 
 hands.onResults(onResults);
 
-// Camera helper
 const camera = new Camera(video, {
   onFrame: async () => {
     await hands.send({ image: video });
@@ -39,7 +41,40 @@ const camera = new Camera(video, {
 });
 camera.start();
 
-// hoofd callback
+// ---------------------------
+// WEBRTC
+// ---------------------------
+let pc;
+let dataChannel;
+
+function createPeer() {
+  pc = new RTCPeerConnection();
+
+  dataChannel = pc.createDataChannel("tracking");
+  dataChannel.onopen = () => console.log("DataChannel open");
+  dataChannel.onclose = () => console.log("DataChannel closed");
+
+  pc.onicecandidate = (e) => {
+    if (e.candidate) return;
+    document.getElementById("offer").value = JSON.stringify(pc.localDescription);
+  };
+}
+
+async function startOffer() {
+  createPeer();
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+}
+
+async function applyAnswer() {
+  const answerText = document.getElementById("answer").value;
+  const answer = JSON.parse(answerText);
+  await pc.setRemoteDescription(answer);
+}
+
+// ---------------------------
+// HANDTRACKING CALLBACK
+// ---------------------------
 function onResults(results) {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
@@ -51,11 +86,11 @@ function onResults(results) {
   if (results.multiHandLandmarks && results.multiHandedness) {
     for (let i = 0; i < results.multiHandLandmarks.length; i++) {
       const landmarks = results.multiHandLandmarks[i];
-      const handedness = results.multiHandedness[i].label; // 'Left' / 'Right'
+      const handedness = results.multiHandedness[i].label;
 
       const color = handedness === 'Left' ? '#00ff88' : '#ff0088';
 
-      // Dots op alle 21 gewrichten (Z‑gebaseerde grootte)
+      // 21 gewrichten
       for (let j = 0; j < landmarks.length; j++) {
         const lm = landmarks[j];
         drawDot(
@@ -67,9 +102,9 @@ function onResults(results) {
         );
       }
 
-      // Extra grote dots op vingertoppen
-      const fingertipIndexes = [4, 8, 12, 16, 20];
-      fingertipIndexes.forEach(idx => {
+      // vingertoppen
+      const tips = [4, 8, 12, 16, 20];
+      tips.forEach(idx => {
         const lm = landmarks[idx];
         drawDot(
           lm.x * canvas.width,
@@ -80,7 +115,6 @@ function onResults(results) {
         );
       });
 
-      // Verbindingen tekenen
       drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
         color,
         lineWidth: 3
@@ -93,11 +127,15 @@ function onResults(results) {
   const payload = buildPayload(results);
   debug.textContent = JSON.stringify(payload, null, 2);
 
-  // Hier kun je straks WebRTC / WebSocket aanroepen:
-  // sendToSpaceOS(payload);
+  // SEND VIA WEBRTC
+  if (dataChannel && dataChannel.readyState === "open") {
+    dataChannel.send(JSON.stringify(payload));
+  }
 }
 
-// JSON payload voor SpaceOS
+// ---------------------------
+// PAYLOAD
+// ---------------------------
 function buildPayload(results) {
   const handsOut = [];
 
@@ -112,15 +150,15 @@ function buildPayload(results) {
         z: lm.z
       }));
 
-      // simpele gesture: pinch (duim + wijsvinger dicht bij elkaar)
-      const thumbTip = landmarks[4];
-      const indexTip = landmarks[8];
-      const dx = thumbTip.x - indexTip.x;
-      const dy = thumbTip.y - indexTip.y;
+      // pinch gesture
+      const thumb = landmarks[4];
+      const index = landmarks[8];
+      const dx = thumb.x - index.x;
+      const dy = thumb.y - index.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      let gesture = 'open';
-      if (dist < 0.05) gesture = 'pinch';
+      let gesture = "open";
+      if (dist < 0.05) gesture = "pinch";
 
       handsOut.push({
         hand: handedness.toLowerCase(),
@@ -131,16 +169,17 @@ function buildPayload(results) {
   }
 
   return {
-    type: 'hands',
+    type: "hands",
     hands: handsOut,
     timestamp: Date.now()
   };
 }
 
-// Dot tekenen met Z‑gebaseerde grootte
+// ---------------------------
+// DOT TEKENEN MET Z‑GROOTTE
+// ---------------------------
 function drawDot(x, y, z, baseSize, color) {
-  // MediaPipe Z is meestal tussen -0.1 en 0.1
-  const scale = 1 - (z * 5); 
+  const scale = 1 - (z * 5);
   const size = baseSize * scale;
 
   ctx.beginPath();
