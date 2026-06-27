@@ -55,20 +55,32 @@ function onResults(results) {
 
       const color = handedness === 'Left' ? '#00ff88' : '#ff0088';
 
-      // Dots op alle 21 gewrichten / punten
+      // Dots op alle 21 gewrichten (Z‑gebaseerde grootte)
       for (let j = 0; j < landmarks.length; j++) {
         const lm = landmarks[j];
-        drawDot(lm.x * canvas.width, lm.y * canvas.height, 8, color);
+        drawDot(
+          lm.x * canvas.width,
+          lm.y * canvas.height,
+          lm.z,
+          8,
+          color
+        );
       }
 
       // Extra grote dots op vingertoppen
       const fingertipIndexes = [4, 8, 12, 16, 20];
       fingertipIndexes.forEach(idx => {
         const lm = landmarks[idx];
-        drawDot(lm.x * canvas.width, lm.y * canvas.height, 14, '#ffffff');
+        drawDot(
+          lm.x * canvas.width,
+          lm.y * canvas.height,
+          lm.z,
+          14,
+          '#ffffff'
+        );
       });
 
-      // Verbindingen tekenen (optioneel, maar handig)
+      // Verbindingen tekenen
       drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
         color,
         lineWidth: 3
@@ -85,14 +97,14 @@ function onResults(results) {
   // sendToSpaceOS(payload);
 }
 
-// simpele payload voor SpaceOS
+// JSON payload voor SpaceOS
 function buildPayload(results) {
   const handsOut = [];
 
   if (results.multiHandLandmarks && results.multiHandedness) {
     for (let i = 0; i < results.multiHandLandmarks.length; i++) {
       const landmarks = results.multiHandLandmarks[i];
-      const handedness = results.multiHandedness[i].label; // 'Left' / 'Right'
+      const handedness = results.multiHandedness[i].label;
 
       const points = landmarks.map(lm => ({
         x: lm.x,
@@ -100,7 +112,7 @@ function buildPayload(results) {
         z: lm.z
       }));
 
-      // heel simpele gesture: pinch (duim + wijsvinger dicht bij elkaar)
+      // simpele gesture: pinch (duim + wijsvinger dicht bij elkaar)
       const thumbTip = landmarks[4];
       const indexTip = landmarks[8];
       const dx = thumbTip.x - indexTip.x;
@@ -125,8 +137,12 @@ function buildPayload(results) {
   };
 }
 
-// helper om een dot te tekenen
-function drawDot(x, y, size, color) {
+// Dot tekenen met Z‑gebaseerde grootte
+function drawDot(x, y, z, baseSize, color) {
+  // MediaPipe Z is meestal tussen -0.1 en 0.1
+  const scale = 1 - (z * 5); 
+  const size = baseSize * scale;
+
   ctx.beginPath();
   ctx.arc(x, y, size, 0, Math.PI * 2);
   ctx.fillStyle = color;
