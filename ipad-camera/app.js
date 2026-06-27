@@ -3,10 +3,10 @@ const canvas = document.getElementById('output');
 const ctx = canvas.getContext('2d');
 const debug = document.getElementById('debug');
 
-// Start camera
+// Camera starten
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: 'user' }, // 'environment' als je achtercamera wilt
+    video: { facingMode: 'user' }, // 'environment' voor achtercamera
     audio: false
   });
   video.srcObject = stream;
@@ -39,41 +39,53 @@ const camera = new Camera(video, {
 });
 camera.start();
 
-// Process results
+// hoofd callback
 function onResults(results) {
-  // Canvas size sync
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
 
-  // Draw camera frame
   ctx.save();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
-  // Draw hands
   if (results.multiHandLandmarks && results.multiHandedness) {
     for (let i = 0; i < results.multiHandLandmarks.length; i++) {
       const landmarks = results.multiHandLandmarks[i];
       const handedness = results.multiHandedness[i].label; // 'Left' / 'Right'
 
-      drawConnectors(ctx, landmarks, HAND_CONNECTIONS,
-        { color: handedness === 'Left' ? '#00ff88' : '#ff0088', lineWidth: 3 });
-      drawLandmarks(ctx, landmarks,
-        { color: '#ffffff', lineWidth: 1 });
+      const color = handedness === 'Left' ? '#00ff88' : '#ff0088';
+
+      // Dots op alle 21 gewrichten / punten
+      for (let j = 0; j < landmarks.length; j++) {
+        const lm = landmarks[j];
+        drawDot(lm.x * canvas.width, lm.y * canvas.height, 8, color);
+      }
+
+      // Extra grote dots op vingertoppen
+      const fingertipIndexes = [4, 8, 12, 16, 20];
+      fingertipIndexes.forEach(idx => {
+        const lm = landmarks[idx];
+        drawDot(lm.x * canvas.width, lm.y * canvas.height, 14, '#ffffff');
+      });
+
+      // Verbindingen tekenen (optioneel, maar handig)
+      drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
+        color,
+        lineWidth: 3
+      });
     }
   }
 
   ctx.restore();
 
-  // Build JSON for SpaceOS
   const payload = buildPayload(results);
   debug.textContent = JSON.stringify(payload, null, 2);
 
-  // TODO: hier straks via WebRTC versturen
+  // Hier kun je straks WebRTC / WebSocket aanroepen:
   // sendToSpaceOS(payload);
 }
 
-// Maak een simpele payload met handposities + basic gesture
+// simpele payload voor SpaceOS
 function buildPayload(results) {
   const handsOut = [];
 
@@ -82,14 +94,13 @@ function buildPayload(results) {
       const landmarks = results.multiHandLandmarks[i];
       const handedness = results.multiHandedness[i].label; // 'Left' / 'Right'
 
-      // Normalized coords (0–1)
       const points = landmarks.map(lm => ({
         x: lm.x,
         y: lm.y,
         z: lm.z
       }));
 
-      // Heel simpele gesture: pinch (duim + wijsvinger dicht bij elkaar)
+      // heel simpele gesture: pinch (duim + wijsvinger dicht bij elkaar)
       const thumbTip = landmarks[4];
       const indexTip = landmarks[8];
       const dx = thumbTip.x - indexTip.x;
@@ -112,4 +123,12 @@ function buildPayload(results) {
     hands: handsOut,
     timestamp: Date.now()
   };
+}
+
+// helper om een dot te tekenen
+function drawDot(x, y, size, color) {
+  ctx.beginPath();
+  ctx.arc(x, y, size, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
 }
