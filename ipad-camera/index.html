@@ -4,9 +4,26 @@
   <meta charset="UTF-8">
   <title>iPad Handtracking → SpaceOS</title>
   <style>
-    body { font-family: sans-serif; background: #111; color: #eee; text-align: center; }
-    video, canvas { width: 100%; max-width: 600px; }
-    pre { text-align: left; max-width: 600px; margin: 1rem auto; background: #222; padding: 1rem; }
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #eee;
+      text-align: center;
+    }
+    video, canvas {
+      width: 100%;
+      max-width: 600px;
+    }
+    pre {
+      text-align: left;
+      max-width: 600px;
+      margin: 1rem auto;
+      background: #222;
+      padding: 1rem;
+      color: #0f0;
+      font-size: 12px;
+      overflow-x: auto;
+    }
   </style>
 </head>
 <body>
@@ -15,7 +32,7 @@
   <canvas id="output"></canvas>
   <pre id="debug"></pre>
 
-  <!-- MediaPipe Hands + drawing utils -->
+  <!-- MediaPipe Hands + helpers -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
