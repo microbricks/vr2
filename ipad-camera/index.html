@@ -24,16 +24,27 @@
       font-size: 12px;
       overflow-x: auto;
     }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
   <h1>iPad Handtracking → SpaceOS</h1>
 
+  <button onclick="startOffer()">Maak Offer</button>
+  <button onclick="applyAnswer()">Set Answer</button>
+
+  <textarea id="offer" placeholder="Offer hier" style="width:90%;height:100px;"></textarea>
+  <textarea id="answer" placeholder="Answer hier" style="width:90%;height:100px;"></textarea>
+
   <video id="cam" autoplay playsinline></video>
   <canvas id="output"></canvas>
   <pre id="debug"></pre>
 
-  <!-- MediaPipe Hands + helpers -->
+  <!-- MediaPipe Hands -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
